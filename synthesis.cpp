@@ -38,9 +38,15 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     Syn_Frame::swin_state_bdd_set.insert(ull(FormulaInBdd::TRUE_bddP_));
     Syn_Frame::ewin_state_bdd_set.insert(ull(FormulaInBdd::FALSE_bddP_));
 
-    Syn_Frame *init = new Syn_Frame(src_formula);
-
-    return forwardSearch(init);
+    hash_set<aalta_formula*> and_sub_afs = src_formula->and_to_set();
+    for (auto it : and_sub_afs)
+    {
+        Syn_Frame *init = new Syn_Frame(it);
+        if (forwardSearch(init))
+            return true;
+        delete init;
+    }
+    return false;
 }
 
 bool forwardSearch(Syn_Frame *init_frame)
