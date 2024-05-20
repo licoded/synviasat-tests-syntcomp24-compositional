@@ -221,7 +221,7 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
 
 void YCons::processSignal(Signal sig, DdNode *succ)
 {
-    assert(sig != To_swin);
+    // assert(sig != To_swin);
     if (sig == To_ewin)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
@@ -231,6 +231,13 @@ void YCons::processSignal(Signal sig, DdNode *succ)
             status_ = Ewin;
         else if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
             status_ = Dfs_complete;
+    }
+    if (sig == To_swin)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+            insert_swin_Y_idx(it->second);
+        status_ = Swin;
     }
     else if (sig == Pending)
     {
@@ -306,12 +313,17 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
     {
         if (current_X_idx_ == -1)
             for (int i = 0; i < X_parts_.size(); ++i)
-                if (swin_X_idx_.find(i) == swin_X_idx_.end() &&
+                if ((WholeDFA_FLAG || swin_X_idx_.find(i) == swin_X_idx_.end()) &&
                     dfs_complete_X_idx_.find(i) == dfs_complete_X_idx_.end())
                 {
                     current_X_idx_ = i;
                     break;
                 }
+        if (current_X_idx_ == -1)
+        {
+            processSignal(Unsat, NULL);
+            return false;
+        }
         aalta_formula *af_X = X_parts_[current_X_idx_];
         aalta_formula *af_Y = Y_cons_[current_X_idx_]->getEdge();
         edge_af = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
@@ -333,6 +345,11 @@ aalta_formula *YCons::getEdge()
             current_Y_idx_ = i;
             break;
         }
+    if (current_Y_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return NULL;
+    }
     return Y_parts_[current_Y_idx_];
 }
 
@@ -416,6 +433,15 @@ void YCons::insert_ewin_Y_idx(int y)
     if (ewin_Y_idx_.find(y) == ewin_Y_idx_.end())
     {
         ewin_Y_idx_.insert(y);
+        aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
+        blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
+    }
+}
+void YCons::insert_swin_Y_idx(int y)
+{
+    if (swin_Y_idx_.find(y) == swin_Y_idx_.end())
+    {
+        swin_Y_idx_.insert(y);
         aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
         blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
     }

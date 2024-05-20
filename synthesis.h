@@ -14,6 +14,7 @@ using namespace std;
 using namespace aalta;
 
 extern bool SAT_TRACE_FLAG;
+extern bool WholeDFA_FLAG;
 
 typedef unsigned long long ull;
 
@@ -33,6 +34,7 @@ private:
     int ewin_checked_idx_;
 
     static unordered_map<ull, set<DdNode *> *> predecessors;
+    static unordered_map<ull, set<DdNode *> *> successors;
 
 public:
     static set<int> var_X, var_Y;
@@ -61,12 +63,15 @@ public:
 
     bool getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model);
     Status get_status() { return status_; }
+    bool is_dfs_complete() { return edgeCons_->is_dfs_complete(); }
 
     bool checkSwinForBackwardSearch();
 
     static void addToGraph(DdNode *src, DdNode *dst);
     static set<DdNode *> *getPredecessors(DdNode *);
     static void freePredecessorsSet(DdNode *);
+    static set<DdNode *> *getSuccessors(DdNode *);
+    static void freeSuccessorsSet(DdNode *);
     static void releasePredecessors()
     {
         for (auto it : Syn_Frame::predecessors)
@@ -87,6 +92,8 @@ public:
 
 bool forwardSearch(Syn_Frame *);
 void backwardSearch(std::vector<Syn_Frame *> &scc);
+
+bool forwardSearch_wholeDFA(Syn_Frame *);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);
@@ -133,6 +140,10 @@ inline void Syn_Frame::addToGraph(DdNode *src, DdNode *dst)
     if (predecessors.find(ull(dst)) == predecessors.end())
         predecessors[ull(dst)] = new set<DdNode *>();
     (predecessors[ull(dst)])->insert(src);
+
+    if (successors.find(ull(src)) == successors.end())
+        successors[ull(src)] = new set<DdNode *>();
+    (successors[ull(src)])->insert(dst);
 }
 
 inline set<DdNode *> *Syn_Frame::getPredecessors(DdNode *s)
@@ -141,11 +152,24 @@ inline set<DdNode *> *Syn_Frame::getPredecessors(DdNode *s)
     return predecessors[ull(s)];
 }
 
+inline set<DdNode *> *Syn_Frame::getSuccessors(DdNode *s)
+{
+    assert(successors.find(ull(s)) != successors.end());
+    return successors[ull(s)];
+}
+
 inline void Syn_Frame::freePredecessorsSet(DdNode *s)
 {
     assert(predecessors.find(ull(s)) != predecessors.end());
     delete predecessors[ull(s)];
     predecessors.erase(ull(s));
+}
+
+inline void Syn_Frame::freeSuccessorsSet(DdNode *s)
+{
+    assert(successors.find(ull(s)) != successors.end());
+    delete successors[ull(s)];
+    successors.erase(ull(s));
 }
 
 #endif

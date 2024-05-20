@@ -38,6 +38,7 @@ private:
     unordered_multimap<ull, int> succ_bddP_to_idx_;
 
     set<int> ewin_Y_idx_;
+    set<int> swin_Y_idx_;
     set<int> searched_Y_idx_;
 
     aalta_formula *blocked_Y_;
@@ -46,6 +47,7 @@ private:
     Status status_;
 
     void insert_ewin_Y_idx(int y);
+    void insert_swin_Y_idx(int y);
     void insert_searched_Y_idx(int y);
 
     void resizeContainers()
@@ -65,6 +67,7 @@ public:
     bool getEdge(unordered_set<int> &edge,
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
+    bool is_dfs_complete() { return dfs_complete_X_idx_.size() == X_parts_.size(); };
 
 private:
     aalta_formula *state_af_;

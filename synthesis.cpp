@@ -10,6 +10,7 @@ using namespace std;
 using namespace aalta;
 
 bool SAT_TRACE_FLAG = false;
+bool WholeDFA_FLAG = false;
 
 unsigned int Syn_Frame::num_varX;
 unsigned int Syn_Frame::num_varY;
@@ -197,6 +198,154 @@ bool forwardSearch(Syn_Frame *init_frame)
     }
 }
 
+bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
+{
+    SAT_TRACE_FLAG = false;
+    dfs_time = 0;
+    dfn.clear(), low.clear();
+    int dfs_cur = 0;
+
+    // set dfn and low value for cur_frame (init_frame)
+    initial_tarjan_frame(init_frame);
+
+    vector<Syn_Frame *> tarjan_sta; // for tarjan algorithm
+    vector<Syn_Frame *> dfs_sta;    // for DFS
+    dfs_sta.push_back(init_frame);
+    tarjan_sta.push_back(init_frame);
+
+    unordered_map<ull, int> prefix_bdd2curIdx_map;
+    unordered_map<ull, int> sta_bdd2curIdx_map;
+    prefix_bdd2curIdx_map.insert({ull(init_frame->GetBddPointer()), dfs_cur});
+    sta_bdd2curIdx_map.insert({ull(init_frame->GetBddPointer()), tarjan_sta.size() - 1});
+    queue<pair<aalta_formula *, aalta_formula *>> model;
+    while (dfs_cur >= 0)
+    {
+        Status cur_state_status = dfs_sta[dfs_cur]->checkStatus();
+        bool cur_state_dfsComplete_flag = dfs_sta[dfs_cur]->is_dfs_complete();
+        DdNode *cur_bddP = dfs_sta[dfs_cur]->GetBddPointer();
+        if (cur_state_dfsComplete_flag)
+        {
+            if (dfn.at((ull)cur_bddP) == low.at((ull)cur_bddP))
+            {
+                vector<Syn_Frame *> scc;
+                getScc(dfs_cur, scc, tarjan_sta, sta_bdd2curIdx_map);
+                backwardSearch(scc);
+                for (auto it : scc)
+                    delete it;
+            }
+            prefix_bdd2curIdx_map.erase((ull)cur_bddP);
+            dfs_sta.pop_back();
+            --dfs_cur;
+            if (dfs_cur < 0)
+            {
+                Syn_Frame::releasePredecessors();
+                return cur_state_status == Swin;
+            }
+            else
+            {
+                Syn_Frame *predecessor_fr = dfs_sta[dfs_cur];
+                Signal signal = To_swin;
+                if (cur_state_status == Ewin)
+                    signal = To_ewin;
+                else if (cur_state_status == Dfs_complete)
+                    signal = Pending;
+                predecessor_fr->processSignal(signal, cur_bddP);
+
+                while (!model.empty())
+                    model.pop();
+
+                update_by_low(predecessor_fr, cur_bddP);
+                continue;
+            }
+        }
+
+        unordered_set<int> edge_var_set;
+        bool exist_edge_to_explorer = dfs_sta[dfs_cur]->getEdge(edge_var_set, model);
+
+        if (!exist_edge_to_explorer)
+            continue;
+
+        if (IsAcc(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set)) // i.e. next_frame is true/swin
+        {
+            dfs_sta[dfs_cur]->processSignal(To_swin, FormulaInBdd::TRUE_bddP_);
+            while (!model.empty())
+                model.pop();
+        }
+        else
+        {
+            aalta_formula *next_af = FormulaProgression(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set); //->simplify();
+            // cout<<next_af->to_string()<<endl;
+            Syn_Frame *next_frame = new Syn_Frame(next_af);
+            if (next_frame->get_status() == Swin)
+            {
+                Syn_Frame::insert_swin_state(next_frame->GetBddPointer(),false);
+                dfs_sta[dfs_cur]->processSignal(To_swin, next_frame->GetBddPointer());
+                while (!model.empty())
+                    model.pop();
+                continue;
+            }
+
+            Syn_Frame::addToGraph(dfs_sta[dfs_cur]->GetBddPointer(), next_frame->GetBddPointer());
+
+            if (dfn.find(ull(next_frame->GetBddPointer())) == dfn.end())
+            {
+                initial_tarjan_frame(next_frame);
+
+                dfs_sta.push_back(next_frame);
+                tarjan_sta.push_back(next_frame);
+                dfs_cur++;
+                prefix_bdd2curIdx_map.insert({(ull)next_frame->GetBddPointer(), dfs_cur});
+                sta_bdd2curIdx_map.insert({(ull)next_frame->GetBddPointer(), tarjan_sta.size() - 1});
+            }
+            else
+            {
+                // update low
+                if (sta_bdd2curIdx_map.find(ull(next_frame->GetBddPointer())) != sta_bdd2curIdx_map.end())
+                    update_by_dfn(dfs_sta[dfs_cur], next_frame);
+
+                // do synthesis feedback
+                if (prefix_bdd2curIdx_map.find((ull)next_frame->GetBddPointer()) != prefix_bdd2curIdx_map.end())
+                {
+                    /**
+                     * cur_Y has X -> prefix, cannot make cur_state undetermined
+                     * only all Y has X -> prefix, can make cur_state undetermined
+                     */
+                    // self loop is processed in the constructiobn of edgeCons
+                    assert(next_frame->GetBddPointer() != dfs_sta[dfs_cur]->GetBddPointer());
+                    dfs_sta[dfs_cur]->processSignal(Pending, next_frame->GetBddPointer());
+                    while (!model.empty())
+                        model.pop();
+                }
+                else // else: has cur-- (moved backward)
+                {
+                    Status next_state_status;
+                    auto Iter = sta_bdd2curIdx_map.find(ull(next_frame->GetBddPointer()));
+                    if (Iter != sta_bdd2curIdx_map.end())
+                        next_state_status = tarjan_sta[Iter->second]->get_status();
+                    else
+                    {
+                        next_state_status = Syn_Frame::getBddStatus(next_frame->GetBddPointer());
+                    }
+                    assert(next_state_status != Dfs_incomplete);
+                    Signal sig = To_swin;
+                    if (next_state_status == Ewin)
+                        sig = To_ewin;
+                    else if (next_state_status == Dfs_complete)
+                        sig = Pending;
+                    dfs_sta[dfs_cur]->processSignal(sig, next_frame->GetBddPointer());
+                    while (!model.empty())
+                        model.pop();
+                    /*
+                     * TODO: whether modify ull(next_frame->GetBddPointer()) back to dfs_sta[dfs_cur]->current_next_stateid_?
+                     *              need assign dfs_sta[dfs_cur]->current_next_stateid_ in getEdge!!!
+                     */
+                }
+                delete next_frame;
+            }
+        }
+    }
+}
+
 void backwardSearch(vector<Syn_Frame *> &scc)
 {
     unordered_map<ull, Syn_Frame *> bddP_to_synFrP;
@@ -233,7 +382,7 @@ void backwardSearch(vector<Syn_Frame *> &scc)
             if (bddP_to_synFrP[ull(s)]->checkSwinForBackwardSearch())
             {
                 Syn_Frame::insert_swin_state(s, false);
-                Syn_Frame::remove_dfs_complete_state(s);
+                // Syn_Frame::remove_dfs_complete_state(s);
                 new_swin.insert(s);
                 undecided.erase(s);
             }
@@ -243,7 +392,7 @@ void backwardSearch(vector<Syn_Frame *> &scc)
     for (auto s : undecided)
     {
         Syn_Frame::insert_ewin_state(s, false);
-        Syn_Frame::remove_dfs_complete_state(s);
+        // Syn_Frame::remove_dfs_complete_state(s);
     }
     return;
 }
