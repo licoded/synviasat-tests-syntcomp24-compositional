@@ -14,6 +14,7 @@ using namespace std;
 using namespace aalta;
 
 extern bool SAT_TRACE_FLAG;
+extern bool WholeDFA_FLAG;
 
 typedef unsigned long long ull;
 
@@ -87,6 +88,8 @@ public:
 
 bool forwardSearch(Syn_Frame *);
 void backwardSearch(std::vector<Syn_Frame *> &scc);
+
+bool forwardSearch_wholeDFA(Syn_Frame *);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);
