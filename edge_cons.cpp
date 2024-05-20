@@ -160,7 +160,13 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
         else if ((swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
                  X_parts_.size())
             status_ = Dfs_complete;
-        current_X_idx_ = -1;
+        if (!WholeDFA_FLAG)
+            current_X_idx_ = -1;
+        else
+        {
+            if (trav_all_succ_X_idx_.find(current_X_idx_) == trav_all_succ_X_idx_.end())
+                current_X_idx_ = -1;
+        }
     }
     else if (sig == To_ewin)
     {
@@ -316,7 +322,7 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
     {
         if (current_X_idx_ == -1)
             for (int i = 0; i < X_parts_.size(); ++i)
-                if ((WholeDFA_FLAG || swin_X_idx_.find(i) == swin_X_idx_.end()) &&
+                if (swin_X_idx_.find(i) == swin_X_idx_.end() &&
                     dfs_complete_X_idx_.find(i) == dfs_complete_X_idx_.end())
                 {
                     current_X_idx_ = i;
@@ -338,12 +344,54 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
     return true;
 }
 
+bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)
+{
+    aalta_formula *edge_af = NULL;
+    if (current_X_idx_ == -1)
+        for (int i = 0; i < X_parts_.size(); ++i)
+            if (trav_all_succ_X_idx_.find(i) == trav_all_succ_X_idx_.end())
+            {
+                current_X_idx_ = i;
+                break;
+            }
+    if (current_X_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return false;
+    }
+    aalta_formula *af_X = X_parts_[current_X_idx_];
+    aalta_formula *af_Y = Y_cons_[current_X_idx_]->getEdge_wholeDFA();
+    edge_af = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
+    edge_af = edge_af->simplify();
+    edge_af->to_set(edge);
+    // cout<<edge_af->to_string()<<endl;
+    fill_in_edgeset(edge);
+    return true; 
+}
+
 aalta_formula *YCons::getEdge()
 {
     assert(!SAT_TRACE_FLAG && current_Y_idx_ == -1);
     for (int i = 0; i < Y_parts_.size(); ++i)
         if (ewin_Y_idx_.find(i) == ewin_Y_idx_.end() &&
             searched_Y_idx_.find(i) == searched_Y_idx_.end())
+        {
+            current_Y_idx_ = i;
+            break;
+        }
+    if (current_Y_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return NULL;
+    }
+    return Y_parts_[current_Y_idx_];
+}
+
+aalta_formula *YCons::getEdge_wholeDFA()
+{
+    assert(!SAT_TRACE_FLAG && current_Y_idx_ == -1);
+    for (int i = 0; i < Y_parts_.size(); ++i)
+        if (trav_all_succ_Y_idx_.find(i) == trav_all_succ_Y_idx_.end())
         {
             current_Y_idx_ = i;
             break;
