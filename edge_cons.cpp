@@ -154,6 +154,11 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
         {
             insert_swin_X_idx(it->second);
             Y_cons_[it->second]->processSignal(To_swin, succ);
+            // NOTE: the following codes are useless, as we only need do in edgeCons::getEdge_wholeDFA
+            // if (Y_cons_[it->second]->hasTravAllEdges())
+            // {
+            //     insert_trav_all_afX_X_idx(it->second);
+            // }
         }
         if (swin_X_idx_.size() == X_parts_.size())
             status_ = Swin;
@@ -243,9 +248,12 @@ void YCons::processSignal(Signal sig, DdNode *succ)
     }
     if (sig == To_swin)
     {
+        status_ = Swin;
         if (WholeDFA_FLAG)
         {
-            status_ = Swin;
+            auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+            for (auto it = range.first; it != range.second; ++it)
+                insert_trav_all_afY_Y_idx(it->second);
         }
     }
     else if (sig == Pending)
@@ -349,11 +357,15 @@ bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formu
     aalta_formula *edge_af = NULL;
     if (current_X_idx_ == -1)
         for (int i = 0; i < X_parts_.size(); ++i)
+        {
+            if (Y_cons_[i]->hasTravAllEdges())
+                insert_trav_all_afX_X_idx(i);
             if (trav_all_afX_X_idx_.find(i) == trav_all_afX_X_idx_.end())
             {
                 current_X_idx_ = i;
                 break;
             }
+        }
     if (current_X_idx_ == -1)
     {
         processSignal(Unsat, NULL);

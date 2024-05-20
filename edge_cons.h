@@ -31,6 +31,7 @@ public:
     int find_match_Y_idx(aalta_formula *Y);
     aalta_formula *get_blocked_Y() { return blocked_Y_; }
     bool checkSwinForBackwardSearch();
+    bool hasTravAllEdges() { return trav_all_afY_Y_idx_.size() == Y_parts_.size(); }
 
 private:
     vector<aalta_formula *> Y_parts_;
@@ -49,6 +50,7 @@ private:
 
     void insert_ewin_Y_idx(int y);
     void insert_searched_Y_idx(int y);
+    void insert_trav_all_afY_Y_idx(int y);
 
     void resizeContainers()
     {
@@ -92,6 +94,7 @@ private:
     int find_match_X_idx(aalta_formula *X);
     void insert_swin_X_idx(int x);
     void insert_dfs_complete_X_idx(int x);
+    void insert_trav_all_afX_X_idx(int x);
     bool checkConflict(pair<aalta_formula *, aalta_formula *> &edge)
     {
         return FormulaInBdd::check_conflict(
