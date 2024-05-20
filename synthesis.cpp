@@ -240,9 +240,9 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
     while (dfs_cur >= 0)
     {
         Status cur_state_status = dfs_sta[dfs_cur]->checkStatus();
-        bool cur_state_dfsComplete_flag = false; // TODO
+        bool cur_state_hasTravAll_flag = dfs_sta[dfs_cur]->hasTravAllEdges();
         DdNode *cur_bddP = dfs_sta[dfs_cur]->GetBddPointer();
-        if (cur_state_dfsComplete_flag)
+        if (cur_state_hasTravAll_flag)
         {
             if (dfn.at((ull)cur_bddP) == low.at((ull)cur_bddP))
             {
@@ -540,6 +540,11 @@ void PartitionAtoms(aalta_formula *af, unordered_set<string> &env_val)
 void Syn_Frame::processSignal(Signal sig, DdNode *succ)
 {
     edgeCons_->processSignal(sig, succ);
+}
+
+bool Syn_Frame::hasTravAllEdges()
+{
+    return edgeCons_->hasTravAllEdges();
 }
 
 bool Syn_Frame::getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)

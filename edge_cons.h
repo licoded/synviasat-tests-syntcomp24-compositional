@@ -40,7 +40,7 @@ private:
 
     set<int> ewin_Y_idx_;
     set<int> searched_Y_idx_;
-    set<int> trav_all_succ_Y_idx_;
+    set<int> trav_all_afY_Y_idx_;
 
     aalta_formula *blocked_Y_;
 
@@ -69,6 +69,7 @@ public:
     bool getEdge_wholeDFA(unordered_set<int> &edge,
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
+    bool hasTravAllEdges() { return trav_all_afX_X_idx_.size() == X_parts_.size(); }
 
 private:
     aalta_formula *state_af_;
@@ -81,7 +82,7 @@ private:
 
     set<int> swin_X_idx_;
     set<int> dfs_complete_X_idx_;
-    set<int> trav_all_succ_X_idx_;
+    set<int> trav_all_afX_X_idx_;
 
     Status status_;
     int current_X_idx_;

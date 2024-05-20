@@ -164,7 +164,7 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
             current_X_idx_ = -1;
         else
         {
-            if (trav_all_succ_X_idx_.find(current_X_idx_) == trav_all_succ_X_idx_.end())
+            if (trav_all_afX_X_idx_.find(current_X_idx_) == trav_all_afX_X_idx_.end())
                 current_X_idx_ = -1;
         }
     }
@@ -349,7 +349,7 @@ bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formu
     aalta_formula *edge_af = NULL;
     if (current_X_idx_ == -1)
         for (int i = 0; i < X_parts_.size(); ++i)
-            if (trav_all_succ_X_idx_.find(i) == trav_all_succ_X_idx_.end())
+            if (trav_all_afX_X_idx_.find(i) == trav_all_afX_X_idx_.end())
             {
                 current_X_idx_ = i;
                 break;
@@ -391,7 +391,7 @@ aalta_formula *YCons::getEdge_wholeDFA()
 {
     assert(!SAT_TRACE_FLAG && current_Y_idx_ == -1);
     for (int i = 0; i < Y_parts_.size(); ++i)
-        if (trav_all_succ_Y_idx_.find(i) == trav_all_succ_Y_idx_.end())
+        if (trav_all_afY_Y_idx_.find(i) == trav_all_afY_Y_idx_.end())
         {
             current_Y_idx_ = i;
             break;

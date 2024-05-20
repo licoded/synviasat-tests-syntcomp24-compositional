@@ -60,6 +60,8 @@ public:
     Status checkStatus();
     void processSignal(Signal sig, DdNode *succ);
 
+    bool hasTravAllEdges();
+
     bool getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model);
     Status get_status() { return status_; }
 
