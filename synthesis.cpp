@@ -43,11 +43,30 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     for (auto it : and_sub_afs)
     {
         Syn_Frame *init = new Syn_Frame(it);
-        if (forwardSearch(init))
-            return true;
+        if (!forwardSearch(init))
+            return false;
         delete init;
     }
-    return false;
+
+    // get whole DFA
+    // TODO: dfa = dfaTrue()
+    for (auto it : and_sub_afs)
+    {
+        Syn_Frame *init = new Syn_Frame(it);
+        forwardSearch_wholeDFA(init);
+
+        // TODO: print_graph(graph_cur); // for DEBUG
+
+        // TOOD: dfa_cur = toDFA(graph_cur);
+
+        // TODO: dfa_cur = minize(dfa_cur);
+        // TODO: dfa = dfaProduct(dfa, dfa_cur, dfaAnd);
+        // TODO: dfa = dfaMinize(dfa);
+
+        delete init;
+    }
+
+    return true;
 }
 
 bool forwardSearch(Syn_Frame *init_frame)
@@ -443,7 +462,7 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     if (neg_acc_X == NULL)
         status_ = Swin;
     state_in_bdd_ = new FormulaInBdd(af);
-    if (status_ != Swin)
+    if (WholeDFA_FLAG || status_ != Swin)
     {
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, neg_acc_X);
         status_ = edgeCons_->get_status();
@@ -525,6 +544,8 @@ void Syn_Frame::processSignal(Signal sig, DdNode *succ)
 
 bool Syn_Frame::getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)
 {
+    if (WholeDFA_FLAG)
+        return edgeCons_->getEdge_wholeDFA(edge, model);
     return edgeCons_->getEdge(edge, model);
 }
 

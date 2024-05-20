@@ -26,6 +26,7 @@ public:
     Status get_status() { return status_; }
     void processSignal(Signal, DdNode *succ);
     aalta_formula *getEdge();
+    aalta_formula *getEdge_wholeDFA();
     aalta_formula * set_search_direction(aalta_formula *Y);
     int find_match_Y_idx(aalta_formula *Y);
     aalta_formula *get_blocked_Y() { return blocked_Y_; }
@@ -40,6 +41,7 @@ private:
     set<int> ewin_Y_idx_;
     set<int> swin_Y_idx_;
     set<int> searched_Y_idx_;
+    set<int> trav_all_succ_Y_idx_;
 
     aalta_formula *blocked_Y_;
 
@@ -66,6 +68,8 @@ public:
     void processSignal(Signal, DdNode *succ);
     bool getEdge(unordered_set<int> &edge,
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
+    bool getEdge_wholeDFA(unordered_set<int> &edge,
+                 queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
     bool is_dfs_complete() { return dfs_complete_X_idx_.size() == X_parts_.size(); };
 
@@ -80,6 +84,7 @@ private:
 
     set<int> swin_X_idx_;
     set<int> dfs_complete_X_idx_;
+    set<int> trav_all_succ_X_idx_;
 
     Status status_;
     int current_X_idx_;
