@@ -249,6 +249,8 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
                 vector<Syn_Frame *> scc;
                 getScc(dfs_cur, scc, tarjan_sta, sta_bdd2curIdx_map);
                 backwardSearch(scc);
+                cout << "++ scc.size: " << scc.size() << endl;
+                // addSccToGraph(scc);
                 for (auto it : scc)
                     delete it;
             }

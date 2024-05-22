@@ -31,7 +31,7 @@ public:
     int find_match_Y_idx(aalta_formula *Y);
     aalta_formula *get_blocked_Y() { return blocked_Y_; }
     bool checkSwinForBackwardSearch();
-    bool hasTravAllEdges() { return trav_all_afY_Y_idx_.size() == Y_parts_.size(); }
+    bool hasTravAllEdges() { return trav_all_afY_Y_idx_.size() == Y_parts_.size(); }    // block_Y_ should equal to False when return true
 
 private:
     vector<aalta_formula *> Y_parts_;
@@ -42,8 +42,10 @@ private:
     set<int> ewin_Y_idx_;
     set<int> searched_Y_idx_;
     set<int> trav_all_afY_Y_idx_;
+    set<int> swin_Y_idx_;
 
     aalta_formula *blocked_Y_;
+    aalta_formula *swin_Y_;
 
     int current_Y_idx_;
     Status status_;
@@ -51,6 +53,7 @@ private:
     void insert_ewin_Y_idx(int y);
     void insert_searched_Y_idx(int y);
     void insert_trav_all_afY_Y_idx(int y);
+    void insert_swin_Y_idx(int y);
 
     void resizeContainers()
     {

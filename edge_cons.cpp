@@ -83,7 +83,8 @@ edgeCons::~edgeCons()
 }
 
 YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_formula *af_X)
-    : blocked_Y_(aalta_formula::TRUE()), current_Y_idx_(-1), status_(Dfs_incomplete)
+    : blocked_Y_(aalta_formula::TRUE()), current_Y_idx_(-1), status_(Dfs_incomplete),
+        swin_Y_(aalta_formula::FALSE())
 {
     queue<tuple<DdNode *, aalta_formula *, bool>> q;
     q.push({root, NULL, false});
@@ -253,7 +254,10 @@ void YCons::processSignal(Signal sig, DdNode *succ)
         {
             auto range = succ_bddP_to_idx_.equal_range(ull(succ));
             for (auto it = range.first; it != range.second; ++it)
+            {
+                insert_swin_Y_idx(it->second);
                 insert_trav_all_afY_Y_idx(it->second);
+            }
         }
     }
     else if (sig == Pending)
@@ -505,6 +509,16 @@ void YCons::insert_searched_Y_idx(int y)
     if (searched_Y_idx_.find(y) == searched_Y_idx_.end())
     {
         searched_Y_idx_.insert(y);
+        aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
+        blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
+    }
+}
+void YCons::insert_swin_Y_idx(int y)
+{
+    if (swin_Y_idx_.find(y) == swin_Y_idx_.end())
+    {
+        swin_Y_idx_.insert(y);
+        swin_Y_ = (aalta_formula(aalta_formula::Or, swin_Y_, Y_parts_[y]).simplify())->unique();
         aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
         blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
     }
