@@ -46,6 +46,7 @@ private:
 
     aalta_formula *blocked_Y_;
     aalta_formula *swin_Y_;
+    aalta_formula *traved_Y_;
 
     int current_Y_idx_;
     Status status_;
@@ -79,6 +80,7 @@ public:
 private:
     aalta_formula *state_af_;
     aalta_formula *blocked_X_;
+    aalta_formula *traved_X_;
 
     vector<aalta_formula *> X_parts_;
     vector<YCons *> Y_cons_;

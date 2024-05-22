@@ -9,7 +9,7 @@
 #include "carchecker.h"
 
 edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula*neg_acc_X)
-    : state_af_(state_af), blocked_X_(neg_acc_X),
+    : state_af_(state_af), blocked_X_(neg_acc_X), traved_X_(aalta_formula::FALSE()),
       status_(Dfs_incomplete), current_X_idx_(-1)
 {
     unordered_map<ull, YCons *> bdd_YCons;
@@ -84,7 +84,7 @@ edgeCons::~edgeCons()
 
 YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_formula *af_X)
     : blocked_Y_(aalta_formula::TRUE()), current_Y_idx_(-1), status_(Dfs_incomplete),
-        swin_Y_(aalta_formula::FALSE())
+        swin_Y_(aalta_formula::FALSE()), traved_Y_(aalta_formula::FALSE())
 {
     queue<tuple<DdNode *, aalta_formula *, bool>> q;
     q.push({root, NULL, false});
@@ -495,6 +495,15 @@ void edgeCons::insert_dfs_complete_X_idx(int x)
     }
 }
 
+void edgeCons::insert_trav_all_afX_X_idx(int x)
+{
+    if (trav_all_afX_X_idx_.find(x) == trav_all_afX_X_idx_.end())
+    {
+        trav_all_afX_X_idx_.insert(x);
+        traved_X_ = (aalta_formula(aalta_formula::Or, traved_X_, X_parts_[x]).simplify())->unique();
+    }
+}
+
 void YCons::insert_ewin_Y_idx(int y)
 {
     if (ewin_Y_idx_.find(y) == ewin_Y_idx_.end())
@@ -511,6 +520,14 @@ void YCons::insert_searched_Y_idx(int y)
         searched_Y_idx_.insert(y);
         aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
         blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
+    }
+}
+void YCons::insert_trav_all_afY_Y_idx(int y)
+{
+    if (trav_all_afY_Y_idx_.find(y) == trav_all_afY_Y_idx_.end())
+    {
+        trav_all_afY_Y_idx_.insert(y);
+        traved_Y_ = (aalta_formula(aalta_formula::Or, traved_Y_, Y_parts_[y]).simplify())->unique();
     }
 }
 void YCons::insert_swin_Y_idx(int y)
