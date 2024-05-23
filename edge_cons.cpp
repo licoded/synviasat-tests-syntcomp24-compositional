@@ -120,7 +120,7 @@ YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
             {
                 status_ = Swin;
                 insert_trav_all_afY_Y_idx(Y_parts_.size() - 1);
-                return; // NOTE: cannot insert to succ_bddP_to_idx_ as will ERROR when dtor (e, but adding a judge in dtor is OK)
+                continue; // NOTE: cannot insert to succ_bddP_to_idx_ as will ERROR when dtor (e, but adding a judge in dtor is OK)
             }
             else if (succ_state_bdd == state_bddp ||
                      succ_state_bdd == FormulaInBdd::FALSE_bddP_)
