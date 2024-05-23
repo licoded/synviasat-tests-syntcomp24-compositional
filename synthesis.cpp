@@ -108,10 +108,10 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP);
         string af_s = it->to_string();
-        string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dfa";
-        string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dot";
+        string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
+        string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
 
-        dfaExport(dfa_cur, string2char_ptr(dot_filename).get(), var_num, var_names, orders);
+        dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders);
         system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot "+dfa_filename+" "+dot_filename).c_str());
 
         // TODO: dfa_cur = minize(dfa_cur);
