@@ -39,6 +39,7 @@ shared_ptr<char> string2char_ptr(const string &s)
 {
     shared_ptr<char> ptr(new char[s.size() + 1]);
     strcpy(ptr.get(), s.c_str());
+    ptr.get()[s.size()] = '\0';
     return ptr;
 }
 shared_ptr<char> af2binaryString(aalta_formula *af)
@@ -89,10 +90,22 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     char **var_names = new char *[var_num];
     int var_cnt = 0;
     for (auto item : Syn_Frame::var_X)
-        var_names[var_cnt++] = string2char_ptr(aalta_formula(item, NULL, NULL).to_string()).get();
+    {
+        auto var_str = aalta_formula(item, NULL, NULL).to_string();
+        var_names[var_cnt] = new char[var_str.size() + 1];
+        strcpy(var_names[var_cnt], var_str.c_str());
+        var_names[var_cnt][var_str.size()] = '\0';
+        var_cnt++;
+    }
     for (auto item : Syn_Frame::var_Y)
-        var_names[var_cnt++] = string2char_ptr(aalta_formula(item, NULL, NULL).to_string()).get();
-    char *orders = string2char_ptr(string('0', var_num)).get();
+    {
+        auto var_str = aalta_formula(item, NULL, NULL).to_string();
+        var_names[var_cnt] = new char[var_str.size() + 1];
+        strcpy(var_names[var_cnt], var_str.c_str());
+        var_names[var_cnt][var_str.size()] = '\0';
+        var_cnt++;
+    }
+    auto orders = string2char_ptr(string('0', var_num));
 
     // get whole DFA
     // TODO: dfa = dfaTrue()
@@ -111,7 +124,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
 
-        dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders);
+        dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
         system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot "+dfa_filename+" "+dot_filename).c_str());
 
         // TODO: dfa_cur = minize(dfa_cur);
@@ -120,6 +133,8 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
         // delete init; // NOTE: WholeDFA --> init belongs to some scc --> has been deleted in forwardSearch_wholeDFA ???
     }
+
+    // TODO: delete char** and char*
 
     return true;
 }
