@@ -13,12 +13,17 @@ SYNTHESIS		=	formula_in_bdd.cpp synthesis.cpp edge_cons.cpp preprocessAcc.cpp
 
 BDD_LIB			=	deps/CUDD-install/lib/libcudd.a
 
+HOME_ROOT		=		/home/lic/syntcomp2024/install_root/usr/local
+INCLUDE_ROOT	=		${HOME_ROOT}/include
+LIBRARY_ROOT	=		${HOME_ROOT}/lib
 
-ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTILFILES) $(SYNTHESIS) $(BDD_LIB)
+MONA_LIBS		=		${LIBRARY_ROOT}/libmonadfa.so
+
+ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTILFILES) $(SYNTHESIS) $(BDD_LIB) ${MONA_LIBS}
 
 
 CC	    =   g++ -std=c++11
-FLAG    = -I./  -I./minisat/ -isystem./minisat  -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -w #-fpermissive 
+FLAG    = -I./  -I./minisat/ -I${INCLUDE_ROOT} -isystem./minisat  -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -w #-fpermissive 
 DEBUGFLAG   =	-D DEBUG -Wall -g #-pg -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
 RELEASEFLAG = -O3 -static -flto -funroll-loops -fprofile-use #-pg 
 
@@ -37,9 +42,11 @@ ltlparser/ltlparser.c :
 .PHONY :    release debug clean
 
 release :   $(ALLFILES)
+		LD_LIBRARY_PATH=/home/lic/syntcomp2024/install_root/usr/local/lib
 	    $(CC) $(FLAG) $(RELEASEFLAG) $(ALLFILES) -lm -lz -o ltlfsyn
 
 debug :	$(ALLFILES)
+	LD_LIBRARY_PATH=/home/lic/syntcomp2024/install_root/usr/local/lib
 	$(CC) $(FLAG) $(DEBUGFLAG) $(ALLFILES) -lm -lz -o ltlfsyn
 
 clean :

@@ -52,6 +52,16 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     WholeDFA_FLAG = true;
     SAT_TRACE_FLAG = false;
 
+    // prepare for export DFA
+    int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
+    char **var_names = new char *[var_num];
+    int var_cnt = 0;
+    for (auto item : Syn_Frame::var_X)
+        var_names[var_cnt++] = string2char_ptr(aalta_formula(item, NULL, NULL).to_string()).get();
+    for (auto item : Syn_Frame::var_Y)
+        var_names[var_cnt++] = string2char_ptr(aalta_formula(item, NULL, NULL).to_string()).get();
+    char *orders = string2char_ptr(string('0', var_num)).get();
+
     // get whole DFA
     // TODO: dfa = dfaTrue()
     for (auto it : and_sub_afs)
@@ -62,7 +72,13 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         cout << "sub_af:\t" << it->to_string() << endl;
         printGraph(graph); // for DEBUG
 
-        // TOOD: dfa_cur = toDFA(graph_cur);
+        mona::DFA * dfa_cur = graph2DFA(graph);
+        string af_s = it->to_string();
+        string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dfa";
+        string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dot";
+
+        dfaExport(dfa_cur, string2char_ptr(dot_filename).get(), var_num, var_names, orders);
+        system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot "+dfa_filename+" "+dot_filename).c_str());
 
         // TODO: dfa_cur = minize(dfa_cur);
         // TODO: dfa = dfaProduct(dfa, dfa_cur, dfaAnd);
@@ -455,6 +471,49 @@ void printGraph(Syn_Graph &graph)
             cout << "(" << edge.label->to_string() << ", " << ull(edge.dest) << "), ";
         cout << endl;
     }
+}
+
+mona::DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
+{
+    int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
+    int *var_index = new int[var_num];
+    for (int i = 0; i < var_num; i++) {
+        var_index[i] = i;
+    }
+    unordered_map<ull, int> bddP_to_stateid;
+    int stateid_cnt = 0;
+    bddP_to_stateid.insert({ull(FormulaInBdd::FALSE_bddP_), stateid_cnt++});
+    bddP_to_stateid.insert({ull(FormulaInBdd::TRUE_bddP_), stateid_cnt++});
+    // insert all vertex into bddP_to_stateid
+    for (auto vertex : graph.vertices)
+    {
+        // NOTE: need check repetition as TRUE/FALSE and other bddP may be repeated
+        if (bddP_to_stateid.find(ull(vertex)) == bddP_to_stateid.end())
+            bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
+    }
+    // get init_stateid
+    DdNode *init_bddP = init_frame->GetBddPointer();
+    assert(bddP_to_stateid.find(ull(init_bddP)) != bddP_to_stateid.end());
+    int init_stateid = bddP_to_stateid[ull(init_bddP)];
+
+    mona::dfaSetup(graph.vertices.size(), var_num, var_index);
+    for (auto vertex_and_succ_edges_pair : graph.edges)
+    {
+        auto vertexBddP = vertex_and_succ_edges_pair.first;
+        auto succ_edges = vertex_and_succ_edges_pair.second;
+        mona::dfaAllocExceptions(succ_edges.size());
+        for (auto edge : succ_edges)
+        {
+            int dest_stateid = bddP_to_stateid[ull(edge.dest)];
+            string bin_edge = af2binaryString(edge.label);
+            mona::dfaStoreException(dest_stateid, string2char_ptr(bin_edge).get());
+        }
+        mona::dfaStoreState(0);   // NOTE: I think there are no default transitions!!!
+    }
+    // get state_type_arr_s
+    string state_type_s(bddP_to_stateid.size()-2, '0');
+    state_type_s = "-+" + state_type_s;
+    return mona::dfaBuild(string2char_ptr(state_type_s).get());
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)

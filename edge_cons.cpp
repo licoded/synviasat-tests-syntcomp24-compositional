@@ -8,7 +8,7 @@
 #include "formula/af_utils.h"
 #include "carchecker.h"
 
-edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula*neg_acc_X)
+edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula *neg_acc_X)
     : state_af_(state_af), blocked_X_(neg_acc_X), traved_X_(aalta_formula::FALSE()),
       status_(Dfs_incomplete), current_X_idx_(-1)
 {

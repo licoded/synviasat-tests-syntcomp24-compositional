@@ -2,7 +2,16 @@
 #define __SYNTHESIS__
 
 #include <cassert>
+#include <cstring>
 #include <unordered_set>
+
+namespace mona{
+extern "C" {
+#include <mona/dfa.h>
+}
+#undef TRUE
+#undef FALSE
+}
 
 #include "formula/aalta_formula.h"
 #include "edge_cons.h"
@@ -99,6 +108,14 @@ void backwardSearch(std::vector<Syn_Frame *> &scc);
 bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
 void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
 void printGraph(Syn_Graph &graph);
+string af2binaryString(aalta_formula *af);
+mona::DFA *graph2DFA(Syn_Graph &graph);
+shared_ptr<char> string2char_ptr(const string &s)
+{
+    shared_ptr<char> ptr(new char[s.size() + 1]);
+    strcpy(ptr.get(), s.c_str());
+    return ptr;
+}
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);
