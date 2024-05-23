@@ -40,6 +40,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     Syn_Frame::ewin_state_bdd_set.insert(ull(FormulaInBdd::FALSE_bddP_));
 
     hash_set<aalta_formula*> and_sub_afs = src_formula->and_to_set();
+    WholeDFA_FLAG = false;
     for (auto it : and_sub_afs)
     {
         Syn_Frame *init = new Syn_Frame(it);
@@ -47,6 +48,9 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
             return false;
         delete init;
     }
+
+    WholeDFA_FLAG = true;
+    SAT_TRACE_FLAG = false;
 
     // get whole DFA
     // TODO: dfa = dfaTrue()
@@ -219,7 +223,6 @@ bool forwardSearch(Syn_Frame *init_frame)
 
 bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
 {
-    SAT_TRACE_FLAG = false;
     dfs_time = 0;
     dfn.clear(), low.clear();
     int dfs_cur = 0;
@@ -282,6 +285,11 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
 
         unordered_set<int> edge_var_set;
         bool exist_edge_to_explorer = dfs_sta[dfs_cur]->getEdge(edge_var_set, model);
+
+        cout << "edge:\t";
+        for (auto it : edge_var_set)
+            cout << aalta_formula::get_name(it) << ", ";
+        cout << endl;
 
         if (!exist_edge_to_explorer)
             continue;
@@ -464,7 +472,12 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     if (neg_acc_X == NULL)
         status_ = Swin;
     state_in_bdd_ = new FormulaInBdd(af);
-    if (WholeDFA_FLAG || status_ != Swin)
+    if (WholeDFA_FLAG)
+    {
+        edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, aalta_formula::TRUE());
+        status_ = edgeCons_->get_status();
+    }
+    else if (status_ != Swin)
     {
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, neg_acc_X);
         status_ = edgeCons_->get_status();
