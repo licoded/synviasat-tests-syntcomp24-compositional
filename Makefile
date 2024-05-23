@@ -18,7 +18,7 @@ ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTIL
 
 
 CC	    =   g++ -std=c++11
-FLAG    = -I./  -I./minisat/ -isystem./minisat  -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS #-fpermissive 
+FLAG    = -I./  -I./minisat/ -isystem./minisat  -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -w #-fpermissive 
 DEBUGFLAG   =	-D DEBUG -Wall -g #-pg -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
 RELEASEFLAG = -O3 -static -flto -funroll-loops -fprofile-use #-pg 
 
