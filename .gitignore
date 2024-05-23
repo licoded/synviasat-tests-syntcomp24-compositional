@@ -37,6 +37,9 @@
 # Mac deleted files
 .DS_Store
 
+# CLion
+.idea
+
 # for test cases and scripts
 examples
 
