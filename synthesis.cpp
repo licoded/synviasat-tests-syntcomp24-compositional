@@ -43,7 +43,7 @@ shared_ptr<char> string2char_ptr(const string &s)
 }
 shared_ptr<char> af2binaryString(aalta_formula *af)
 {
-    // -11
+    // -11 -1(TAIL)
     unordered_set<int> edgeset;
     af->to_set(edgeset);
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
@@ -51,8 +51,8 @@ shared_ptr<char> af2binaryString(aalta_formula *af)
     for (auto it : edgeset)
     {
         int var_id = abs(it);
-        assert(bin_edge[var_id-11] == 'X');
-        bin_edge[var_id-11] = it > 0 ? '1' : '0';
+        assert(bin_edge[var_id-12] == 'X');
+        bin_edge[var_id-12] = it > 0 ? '1' : '0';
     }
     return string2char_ptr(bin_edge);
 }
