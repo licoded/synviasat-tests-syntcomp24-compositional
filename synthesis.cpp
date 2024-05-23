@@ -67,7 +67,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         // TODO: dfa = dfaProduct(dfa, dfa_cur, dfaAnd);
         // TODO: dfa = dfaMinize(dfa);
 
-        delete init;
+        // delete init; // NOTE: WholeDFA --> init belongs to some scc --> has been deleted in forwardSearch_wholeDFA ???
     }
 
     return true;
