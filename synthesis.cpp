@@ -34,7 +34,7 @@ unordered_map<ull, int> dfn;
 unordered_map<ull, int> low;
 int dfs_time;
 
-DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame);
+DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP);
 shared_ptr<char> string2char_ptr(const string &s)
 {
     shared_ptr<char> ptr(new char[s.size() + 1]);
@@ -78,6 +78,9 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         delete init;
     }
 
+    if (and_sub_afs.size() == 1)
+        return true;
+
     WholeDFA_FLAG = true;
     SAT_TRACE_FLAG = false;
 
@@ -96,12 +99,14 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     for (auto it : and_sub_afs)
     {
         Syn_Graph graph;
+
         Syn_Frame *init = new Syn_Frame(it);
+        DdNode *init_bddP = init->GetBddPointer();
         forwardSearch_wholeDFA(init, graph);
         cout << "sub_af:\t" << it->to_string() << endl;
         printGraph(graph); // for DEBUG
 
-        DFA *dfa_cur = graph2DFA(graph, init);
+        DFA *dfa_cur = graph2DFA(graph, init_bddP);
         string af_s = it->to_string();
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dot";
@@ -502,7 +507,7 @@ void printGraph(Syn_Graph &graph)
     }
 }
 
-DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
+DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
 {
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
     int *var_index = new int[var_num];
@@ -521,7 +526,6 @@ DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
             bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
     }
     // get init_stateid
-    DdNode *init_bddP = init_frame->GetBddPointer();
     assert(bddP_to_stateid.find(ull(init_bddP)) != bddP_to_stateid.end());
     int init_stateid = bddP_to_stateid[ull(init_bddP)];
 
