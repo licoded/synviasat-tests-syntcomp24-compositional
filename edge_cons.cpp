@@ -170,7 +170,7 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
             current_X_idx_ = -1;
         else
         {
-            if (trav_all_afX_X_idx_.find(current_X_idx_) == trav_all_afX_X_idx_.end())
+            if (trav_all_afX_X_idx_.find(current_X_idx_) != trav_all_afX_X_idx_.end())
                 current_X_idx_ = -1;
         }
     }
