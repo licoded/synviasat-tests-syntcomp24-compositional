@@ -10,6 +10,7 @@
 #include "formula/aalta_formula.h"
 #include "synthesis.h"
 #include "syn_type.h"
+#include "graph.h"
 #include "formula_in_bdd.h"
 #include "deps/CUDD-install/include/cudd.h"
 
@@ -17,6 +18,8 @@ using namespace std;
 using namespace aalta;
 
 typedef unsigned long long ull;
+using Syn_Edge = pair<DdNode *, aalta_formula *>;
+using Syn_Graph = MyGraph<DdNode *, aalta_formula *>;
 
 class YCons
 {
@@ -32,6 +35,7 @@ public:
     aalta_formula *get_blocked_Y() { return blocked_Y_; }
     bool checkSwinForBackwardSearch();
     bool hasTravAllEdges() { return trav_all_afY_Y_idx_.size() == Y_parts_.size(); }    // block_Y_ should equal to False when return true
+    void get_succ_Y_edges(aalta_formula *af_X, vector<Syn_Edge> &succ_Y_edges);
 
 private:
     vector<aalta_formula *> Y_parts_;
@@ -76,6 +80,7 @@ public:
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
     bool hasTravAllEdges() { return trav_all_afX_X_idx_.size() == X_parts_.size(); }
+    void get_succ_edges(vector<Syn_Edge> &succ_Y_edges);
 
 private:
     aalta_formula *state_af_;

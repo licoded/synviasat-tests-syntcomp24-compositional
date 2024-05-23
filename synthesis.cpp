@@ -56,10 +56,11 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     // TODO: dfa = dfaTrue()
     for (auto it : and_sub_afs)
     {
+        Syn_Graph graph;
         Syn_Frame *init = new Syn_Frame(it);
-        forwardSearch_wholeDFA(init);
-
-        // TODO: print_graph(graph_cur); // for DEBUG
+        forwardSearch_wholeDFA(init, graph);
+        cout << "sub_af:\t" << it->to_string() << endl;
+        printGraph(graph); // for DEBUG
 
         // TOOD: dfa_cur = toDFA(graph_cur);
 
@@ -221,7 +222,7 @@ bool forwardSearch(Syn_Frame *init_frame)
     }
 }
 
-bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
+bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
 {
     dfs_time = 0;
     dfn.clear(), low.clear();
@@ -253,7 +254,7 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame)
                 getScc(dfs_cur, scc, tarjan_sta, sta_bdd2curIdx_map);
                 backwardSearch(scc);
                 cout << "++ scc.size: " << scc.size() << endl;
-                // addSccToGraph(scc);
+                addSccToGraph(scc, graph);
                 for (auto it : scc)
                     delete it;
             }
@@ -426,6 +427,36 @@ void backwardSearch(vector<Syn_Frame *> &scc)
     return;
 }
 
+void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
+{
+    for (auto syn_frame_ptr : scc)
+    {
+        vector<Syn_Edge> succ_edges;
+        syn_frame_ptr->get_succ_edges(succ_edges);
+        for (auto syn_edge : succ_edges)
+        {
+            cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
+            graph.add_edge(syn_frame_ptr->GetBddPointer(), syn_edge.first, syn_edge.second);
+        }
+    }
+}
+
+void printGraph(Syn_Graph &graph)
+{
+    cout << "Graph vertices: ";
+    for (auto v : graph.vertices)
+        cout << ull(v) << ", ";
+    cout << endl;
+    cout << "Graph edges: " << endl;
+    for (auto it : graph.edges)
+    {
+        cout << ull(it.first) << ": ";
+        for (auto edge : it.second)
+            cout << "(" << edge.label->to_string() << ", " << ull(edge.dest) << "), ";
+        cout << endl;
+    }
+}
+
 void initial_tarjan_frame(Syn_Frame *cur_frame)
 {
     dfn.insert({ull(cur_frame->GetBddPointer()), dfs_time});
@@ -567,6 +598,11 @@ bool Syn_Frame::getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aa
     if (WholeDFA_FLAG)
         return edgeCons_->getEdge_wholeDFA(edge, model);
     return edgeCons_->getEdge(edge, model);
+}
+
+void Syn_Frame::get_succ_edges(vector<Syn_Edge> &succ_edges)
+{
+    return edgeCons_->get_succ_edges(succ_edges);
 }
 
 bool Syn_Frame::checkSwinForBackwardSearch()

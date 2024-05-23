@@ -14,12 +14,12 @@ struct MyEdge
     K dest;
 };
 
-template<typename LabelType, typename NodeIdType>
+template<typename NodeIdType, typename LabelType>
 class MyGraph
 {
 public:
     unordered_set<NodeIdType> vertices;
-    using EdgeType = MyEdge<LabelType>;
+    using EdgeType = MyEdge<LabelType, NodeIdType>;
     unordered_map<NodeIdType, vector<EdgeType>> edges;
 
     void add_vertex(NodeIdType v)

@@ -426,6 +426,28 @@ aalta_formula *YCons::getEdge_wholeDFA()
     return Y_parts_[current_Y_idx_];
 }
 
+void edgeCons::get_succ_edges(vector<Syn_Edge> &succ_Y_edges)
+{
+    assert(Y_cons_.size() == X_parts_.size());
+    for (int i = 0; i < Y_cons_.size(); ++i)
+    {
+        aalta_formula *af_X = X_parts_[i];
+        Y_cons_[i]->get_succ_Y_edges(af_X, succ_Y_edges);
+    }
+}
+
+void YCons::get_succ_Y_edges(aalta_formula *af_X, vector<Syn_Edge> &succ_Y_edges)
+{
+    assert(Y_parts_.size() == successors_.size());
+    for (int i = 0; i < Y_parts_.size(); ++i)
+    {
+        aalta_formula *af_Y = Y_parts_[i];
+        aalta_formula *af_edge = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
+        DdNode *succ_bdd = successors_[i];
+        succ_Y_edges.push_back({succ_bdd, af_edge});
+    }
+}
+
 aalta_formula *edgeCons::set_search_direction(const pair<aalta_formula *, aalta_formula *> &XY)
 {
     assert(SAT_TRACE_FLAG);

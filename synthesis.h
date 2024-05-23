@@ -8,6 +8,7 @@
 #include "edge_cons.h"
 #include "formula_in_bdd.h"
 #include "syn_type.h"
+#include "graph.h"
 #include "deps/CUDD-install/include/cudd.h"
 
 using namespace std;
@@ -17,6 +18,8 @@ extern bool SAT_TRACE_FLAG;
 extern bool WholeDFA_FLAG;
 
 typedef unsigned long long ull;
+using Syn_Edge = pair<DdNode *, aalta_formula *>;
+using Syn_Graph = MyGraph<DdNode *, aalta_formula *>;
 
 // main entry
 bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, bool verbose);
@@ -65,6 +68,8 @@ public:
     bool getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model);
     Status get_status() { return status_; }
 
+    void get_succ_edges(vector<Syn_Edge> &succ_edges);
+
     bool checkSwinForBackwardSearch();
 
     static void addToGraph(DdNode *src, DdNode *dst);
@@ -91,7 +96,9 @@ public:
 bool forwardSearch(Syn_Frame *);
 void backwardSearch(std::vector<Syn_Frame *> &scc);
 
-bool forwardSearch_wholeDFA(Syn_Frame *);
+bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
+void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
+void printGraph(Syn_Graph &graph);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);
