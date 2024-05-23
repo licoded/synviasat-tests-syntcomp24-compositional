@@ -522,14 +522,21 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
     for (auto vertex : graph.vertices)
     {
         // NOTE: need check repetition as TRUE/FALSE and other bddP may be repeated
-        if (bddP_to_stateid.find(ull(vertex)) == bddP_to_stateid.end())
-            bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
+        if (ull(vertex) == ull(FormulaInBdd::TRUE_bddP_) || ull(vertex) == ull(FormulaInBdd::FALSE_bddP_))
+            continue;
+        assert(bddP_to_stateid.find(ull(vertex)) == bddP_to_stateid.end());
+        bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
     }
     // get init_stateid
     assert(bddP_to_stateid.find(ull(init_bddP)) != bddP_to_stateid.end());
     int init_stateid = bddP_to_stateid[ull(init_bddP)];
 
     dfaSetup(graph.vertices.size(), var_num, var_index);
+    int false_stateid = 0, true_stateid = 1;
+    dfaAllocExceptions(0);
+    dfaStoreState(false_stateid);
+    dfaAllocExceptions(0);
+    dfaStoreState(true_stateid);
     for (auto vertex_and_succ_edges_pair : graph.edges)
     {
         auto vertexBddP = vertex_and_succ_edges_pair.first;
