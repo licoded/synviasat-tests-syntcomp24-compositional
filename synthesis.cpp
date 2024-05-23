@@ -121,20 +121,24 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         printGraph(graph); // for DEBUG
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP);
+        dfa_cur = dfaMinimize(dfa_cur);
         string af_s = it->to_string();
         // delete all spaces from af_s
         af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
 
-        freopen(dot_filename.c_str(), "w", stdout);
+        FILE* original_stdout = stdout;
+        stdout = fopen(dot_filename.c_str(), "w");
         // === real code BEGIN
         unsigned int *var_index = new unsigned int[var_num];
         for (int i = 0; i < var_num; i++) {
             var_index[i] = i;
         }
         dfaPrintGraphviz(dfa_cur, var_num, var_index);
+        // === real code END
         fclose(stdout);
+        stdout = original_stdout;
 
         // dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
         // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+dfa_filename+"\" \""+dot_filename+"\"").c_str());
@@ -536,6 +540,7 @@ void printGraph(Syn_Graph &graph)
 
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
 {
+    assert(graph.vertices.size() > 2);  // NOTE: other cases: 1. sth. -> alway true/false 2. init is true/false !!!
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
     int *var_index = new int[var_num];
     for (int i = 0; i < var_num; i++) {
@@ -543,27 +548,45 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
     }
     unordered_map<ull, int> bddP_to_stateid;
     int stateid_cnt = 0;
-    bddP_to_stateid.insert({ull(FormulaInBdd::FALSE_bddP_), stateid_cnt++});
-    bddP_to_stateid.insert({ull(FormulaInBdd::TRUE_bddP_), stateid_cnt++});
     // insert all vertex into bddP_to_stateid
+    // INSERT-1. init_bddP
+    auto init_vertex_Iter = graph.vertices.find(init_bddP);
+    assert(init_vertex_Iter != graph.vertices.end());
+    bddP_to_stateid.insert({ull(init_bddP), stateid_cnt++});
+    graph.vertices.erase(init_bddP);
+    // INSERT-2. false and true
+    int true_stateid = 1, false_stateid = 2;
+    bddP_to_stateid.insert({ull(FormulaInBdd::TRUE_bddP_), stateid_cnt++});
+    bddP_to_stateid.insert({ull(FormulaInBdd::FALSE_bddP_), stateid_cnt++});
+    graph.vertices.erase(FormulaInBdd::TRUE_bddP_);
+    graph.vertices.erase(FormulaInBdd::FALSE_bddP_);
+    // INSERT-2. others
     for (auto vertex : graph.vertices)
     {
-        // NOTE: need check repetition as TRUE/FALSE and other bddP may be repeated
-        if (ull(vertex) == ull(FormulaInBdd::TRUE_bddP_) || ull(vertex) == ull(FormulaInBdd::FALSE_bddP_))
-            continue;
         assert(bddP_to_stateid.find(ull(vertex)) == bddP_to_stateid.end());
         bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
     }
-    // get init_stateid
-    assert(bddP_to_stateid.find(ull(init_bddP)) != bddP_to_stateid.end());
-    int init_stateid = bddP_to_stateid[ull(init_bddP)];
 
-    dfaSetup(graph.vertices.size(), var_num, var_index);
-    int false_stateid = 0, true_stateid = 1;
-    dfaAllocExceptions(0);
+    dfaSetup(bddP_to_stateid.size(), var_num, var_index);
+    // EDGE-1. init_bddP
+    auto init_edges_Iter = graph.edges.find(init_bddP);
+    assert(init_edges_Iter != graph.edges.end());
+    auto init_succ_edges = init_edges_Iter->second;
+    dfaAllocExceptions(init_succ_edges.size());
+    for (auto edge : init_succ_edges)
+    {
+        int dest_stateid = bddP_to_stateid[ull(edge.dest)];
+        auto bin_edge_ptr = af2binaryString(edge.label);
+        dfaStoreException(dest_stateid, bin_edge_ptr.get());
+    }
     dfaStoreState(false_stateid);
+    graph.edges.erase(init_bddP);
+    // EDGE-2. true and false
     dfaAllocExceptions(0);
     dfaStoreState(true_stateid);
+    dfaAllocExceptions(0);
+    dfaStoreState(false_stateid);
+    // EDGE-3. others
     for (auto vertex_and_succ_edges_pair : graph.edges)
     {
         auto vertexBddP = vertex_and_succ_edges_pair.first;
@@ -575,11 +598,13 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
             auto bin_edge_ptr = af2binaryString(edge.label);
             dfaStoreException(dest_stateid, bin_edge_ptr.get());
         }
-        dfaStoreState(0);   // NOTE: I think there are no default transitions!!!
+        dfaStoreState(false_stateid);   // NOTE: I think there are no default transitions!!!
     }
     // get state_type_arr_s
-    string state_type_s(bddP_to_stateid.size()-2, '0');
-    state_type_s = "-+" + state_type_s;
+    assert(bddP_to_stateid.size() > 2);
+    string state_type_s = bddP_to_stateid.size() > 3 ? string(bddP_to_stateid.size()-3, '0') : "";
+    state_type_s = "0+-" + state_type_s;
+    cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
     return dfaBuild(string2char_ptr(state_type_s).get());
 }
 
