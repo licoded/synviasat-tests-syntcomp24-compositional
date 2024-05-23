@@ -1,5 +1,6 @@
 #include "synthesis.h"
 #include <iostream>
+#include <fstream>
 #include <queue>
 #include <algorithm>
 
@@ -121,11 +122,22 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP);
         string af_s = it->to_string();
+        // delete all spaces from af_s
+        af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
 
-        dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
-        system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+dfa_filename+"\" \""+dot_filename+"\"").c_str());
+        freopen(dot_filename.c_str(), "w", stdout);
+        // === real code BEGIN
+        unsigned int *var_index = new unsigned int[var_num];
+        for (int i = 0; i < var_num; i++) {
+            var_index[i] = i;
+        }
+        dfaPrintGraphviz(dfa_cur, var_num, var_index);
+        fclose(stdout);
+
+        // dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
+        // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+dfa_filename+"\" \""+dot_filename+"\"").c_str());
 
         // TODO: dfa_cur = minize(dfa_cur);
         // TODO: dfa = dfaProduct(dfa, dfa_cur, dfaAnd);
