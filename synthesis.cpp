@@ -72,7 +72,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         cout << "sub_af:\t" << it->to_string() << endl;
         printGraph(graph); // for DEBUG
 
-        mona::DFA * dfa_cur = graph2DFA(graph);
+        DFA * dfa_cur = graph2DFA(graph);
         string af_s = it->to_string();
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dot";
@@ -473,7 +473,7 @@ void printGraph(Syn_Graph &graph)
     }
 }
 
-mona::DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
+DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
 {
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
     int *var_index = new int[var_num];
@@ -496,24 +496,24 @@ mona::DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
     assert(bddP_to_stateid.find(ull(init_bddP)) != bddP_to_stateid.end());
     int init_stateid = bddP_to_stateid[ull(init_bddP)];
 
-    mona::dfaSetup(graph.vertices.size(), var_num, var_index);
+    dfaSetup(graph.vertices.size(), var_num, var_index);
     for (auto vertex_and_succ_edges_pair : graph.edges)
     {
         auto vertexBddP = vertex_and_succ_edges_pair.first;
         auto succ_edges = vertex_and_succ_edges_pair.second;
-        mona::dfaAllocExceptions(succ_edges.size());
+        dfaAllocExceptions(succ_edges.size());
         for (auto edge : succ_edges)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
             string bin_edge = af2binaryString(edge.label);
-            mona::dfaStoreException(dest_stateid, string2char_ptr(bin_edge).get());
+            dfaStoreException(dest_stateid, string2char_ptr(bin_edge).get());
         }
-        mona::dfaStoreState(0);   // NOTE: I think there are no default transitions!!!
+        dfaStoreState(0);   // NOTE: I think there are no default transitions!!!
     }
     // get state_type_arr_s
     string state_type_s(bddP_to_stateid.size()-2, '0');
     state_type_s = "-+" + state_type_s;
-    return mona::dfaBuild(string2char_ptr(state_type_s).get());
+    return dfaBuild(string2char_ptr(state_type_s).get());
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)
