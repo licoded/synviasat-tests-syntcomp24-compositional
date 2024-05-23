@@ -45,6 +45,8 @@ edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula*neg_a
             Y_cons_.push_back(bdd_YCons[ull(true_node)]);
             for (auto it : *YCons_related_succ[ull(Y_cons_.back())])
                 succ_bddP_to_idx_.insert({ull(it), Y_cons_.size() - 1});
+            for (auto it : *YCons_related_succ[ull(Y_cons_.back())])
+                succ_bddP_to_idx_vec_.push_back({ull(it), Y_cons_.size() - 1});
             continue;
         }
 
@@ -117,11 +119,15 @@ YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
             if (succ_state_bdd == FormulaInBdd::TRUE_bddP_)
             {
                 status_ = Swin;
-                return;
+                insert_trav_all_afY_Y_idx(Y_parts_.size() - 1);
+                return; // NOTE: cannot insert to succ_bddP_to_idx_ as will ERROR when dtor (e, but adding a judge in dtor is OK)
             }
             else if (succ_state_bdd == state_bddp ||
                      succ_state_bdd == FormulaInBdd::FALSE_bddP_)
+            {
                 insert_ewin_Y_idx(Y_parts_.size() - 1);
+                insert_trav_all_afY_Y_idx(Y_parts_.size() - 1);
+            }
 
             succ_bddP_to_idx_.insert({ull(succ_state_bdd), successors_.size() - 1});
             continue;

@@ -86,6 +86,7 @@ private:
     vector<YCons *> Y_cons_;
 
     unordered_multimap<ull, int> succ_bddP_to_idx_;
+    vector<pair<ull, int>> succ_bddP_to_idx_vec_;
 
     set<int> swin_X_idx_;
     set<int> dfs_complete_X_idx_;
