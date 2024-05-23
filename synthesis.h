@@ -5,12 +5,6 @@
 #include <cstring>
 #include <unordered_set>
 
-extern "C" {
-#include <mona/dfa.h>
-#undef TRUE
-#undef FALSE
-}
-
 #include "formula/aalta_formula.h"
 #include "edge_cons.h"
 #include "formula_in_bdd.h"
@@ -106,14 +100,7 @@ void backwardSearch(std::vector<Syn_Frame *> &scc);
 bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
 void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
 void printGraph(Syn_Graph &graph);
-string af2binaryString(aalta_formula *af);
-DFA *graph2DFA(Syn_Graph &graph);
-shared_ptr<char> string2char_ptr(const string &s)
-{
-    shared_ptr<char> ptr(new char[s.size() + 1]);
-    strcpy(ptr.get(), s.c_str());
-    return ptr;
-}
+shared_ptr<char> af2binaryString(aalta_formula *af);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);

@@ -3,6 +3,12 @@
 #include <queue>
 #include <algorithm>
 
+extern "C" {
+#include <mona/dfa.h>
+#undef TRUE
+#undef FALSE
+}
+
 #include "formula_in_bdd.h"
 #include "preprocessAcc.h"
 
@@ -27,6 +33,29 @@ unordered_map<ull, set<DdNode *> *> Syn_Frame::predecessors;
 unordered_map<ull, int> dfn;
 unordered_map<ull, int> low;
 int dfs_time;
+
+DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame);
+shared_ptr<char> string2char_ptr(const string &s)
+{
+    shared_ptr<char> ptr(new char[s.size() + 1]);
+    strcpy(ptr.get(), s.c_str());
+    return ptr;
+}
+shared_ptr<char> af2binaryString(aalta_formula *af)
+{
+    // -11
+    unordered_set<int> edgeset;
+    af->to_set(edgeset);
+    int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
+    string bin_edge(var_num, 'X');
+    for (auto it : edgeset)
+    {
+        int var_id = abs(it);
+        assert(bin_edge[var_id-11] == 'X');
+        bin_edge[var_id-11] = it > 0 ? '1' : '0';
+    }
+    return string2char_ptr(bin_edge);
+}
 
 bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, bool verbose = false)
 {
@@ -72,7 +101,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         cout << "sub_af:\t" << it->to_string() << endl;
         printGraph(graph); // for DEBUG
 
-        DFA * dfa_cur = graph2DFA(graph);
+        DFA *dfa_cur = graph2DFA(graph, init);
         string af_s = it->to_string();
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts" + af_s + ".dot";
@@ -505,8 +534,8 @@ DFA *graph2DFA(Syn_Graph &graph, Syn_Frame *init_frame)
         for (auto edge : succ_edges)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
-            string bin_edge = af2binaryString(edge.label);
-            dfaStoreException(dest_stateid, string2char_ptr(bin_edge).get());
+            auto bin_edge_ptr = af2binaryString(edge.label);
+            dfaStoreException(dest_stateid, bin_edge_ptr.get());
         }
         dfaStoreState(0);   // NOTE: I think there are no default transitions!!!
     }
