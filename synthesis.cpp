@@ -35,7 +35,8 @@ unordered_map<ull, int> dfn;
 unordered_map<ull, int> low;
 int dfs_time;
 
-DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP);
+DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
+void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
 shared_ptr<char> string2char_ptr(const string &s)
 {
     shared_ptr<char> ptr(new char[s.size() + 1]);
@@ -107,9 +108,15 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         var_cnt++;
     }
     auto orders = string2char_ptr(string('0', var_num));
+    unsigned int *var_index = new unsigned int[var_num];
+    int *indicies = new int[var_num];
+    for (int i = 0; i < var_num; i++) {
+        var_index[i] = i;
+        indicies[i] = i;
+    }
 
     // get whole DFA
-    // TODO: dfa = dfaTrue()
+    DFA *dfa = dfaTrue();
     for (auto it : and_sub_afs)
     {
         Syn_Graph graph;
@@ -120,7 +127,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         cout << "sub_af:\t" << it->to_string() << endl;
         printGraph(graph); // for DEBUG
 
-        DFA *dfa_cur = graph2DFA(graph, init_bddP);
+        DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
         dfa_cur = dfaMinimize(dfa_cur);
         string af_s = it->to_string();
         // delete all spaces from af_s
@@ -128,28 +135,18 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
         string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
 
-        FILE* original_stdout = stdout;
-        stdout = fopen(dot_filename.c_str(), "w");
-        // === real code BEGIN
-        unsigned int *var_index = new unsigned int[var_num];
-        for (int i = 0; i < var_num; i++) {
-            var_index[i] = i;
-        }
-        dfaPrintGraphviz(dfa_cur, var_num, var_index);
-        // === real code END
-        fclose(stdout);
-        stdout = original_stdout;
-
+        printDFA(dfa_cur, dot_filename, var_num, var_index);
         // dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
         // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+dfa_filename+"\" \""+dot_filename+"\"").c_str());
 
         // TODO: dfa_cur = minize(dfa_cur);
-        // TODO: dfa = dfaProduct(dfa, dfa_cur, dfaAnd);
-        // TODO: dfa = dfaMinize(dfa);
-
+        dfa = dfaProduct(dfa, dfa_cur, dfaAND);
+        dfa = dfaMinimize(dfa);
         // delete init; // NOTE: WholeDFA --> init belongs to some scc --> has been deleted in forwardSearch_wholeDFA ???
     }
 
+    string wholedot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole.dot";
+    printDFA(dfa, wholedot_filename, var_num, var_index);
     // TODO: delete char** and char*
 
     return true;
@@ -538,14 +535,9 @@ void printGraph(Syn_Graph &graph)
     }
 }
 
-DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
+DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
 {
     assert(graph.vertices.size() > 2);  // NOTE: other cases: 1. sth. -> alway true/false 2. init is true/false !!!
-    int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
-    int *var_index = new int[var_num];
-    for (int i = 0; i < var_num; i++) {
-        var_index[i] = i;
-    }
     unordered_map<ull, int> bddP_to_stateid;
     int stateid_cnt = 0;
     // insert all vertex into bddP_to_stateid
@@ -567,7 +559,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
         bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
     }
 
-    dfaSetup(bddP_to_stateid.size(), var_num, var_index);
+    dfaSetup(bddP_to_stateid.size(), var_num, indicies);
     // EDGE-1. init_bddP
     auto init_edges_Iter = graph.edges.find(init_bddP);
     assert(init_edges_Iter != graph.edges.end());
@@ -606,6 +598,17 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP)
     state_type_s = "0+-" + state_type_s;
     cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
     return dfaBuild(string2char_ptr(state_type_s).get());
+}
+
+void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index)
+{
+    FILE* original_stdout = stdout;
+    stdout = fopen(dot_filename.c_str(), "w");
+    // === real code BEGIN
+    dfaPrintGraphviz(dfa, var_num, var_index);
+    // === real code END
+    fclose(stdout);
+    stdout = original_stdout;
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)
