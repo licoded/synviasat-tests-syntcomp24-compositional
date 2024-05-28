@@ -545,7 +545,7 @@ void printGraph(Syn_Graph &graph)
 
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
 {
-    assert(graph.vertices.size() > 2);  // NOTE: other cases: 1. sth. -> alway true/false 2. init is true/false !!!
+    // assert(graph.vertices.size() > 2);  // NOTE: other cases: 1. sth. -> alway true/false 2. init is true/false !!!
     unordered_map<ull, int> bddP_to_stateid;
     int stateid_cnt = 0;
     // insert all vertex into bddP_to_stateid
@@ -570,17 +570,24 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     dfaSetup(bddP_to_stateid.size(), var_num, indicies);
     // EDGE-1. init_bddP
     auto init_edges_Iter = graph.edges.find(init_bddP);
-    assert(init_edges_Iter != graph.edges.end());
-    auto init_succ_edges = init_edges_Iter->second;
-    dfaAllocExceptions(init_succ_edges.size());
-    for (auto edge : init_succ_edges)
+    if (init_edges_Iter != graph.edges.end())
     {
-        int dest_stateid = bddP_to_stateid[ull(edge.dest)];
-        auto bin_edge_ptr = af2binaryString(edge.label);
-        dfaStoreException(dest_stateid, bin_edge_ptr.get());
+        auto init_succ_edges = init_edges_Iter->second;
+        dfaAllocExceptions(init_succ_edges.size());
+        for (auto edge : init_succ_edges)
+        {
+            int dest_stateid = bddP_to_stateid[ull(edge.dest)];
+            auto bin_edge_ptr = af2binaryString(edge.label);
+            dfaStoreException(dest_stateid, bin_edge_ptr.get());
+        }
+        dfaStoreState(false_stateid);
+        graph.edges.erase(init_bddP);
     }
-    dfaStoreState(false_stateid);
-    graph.edges.erase(init_bddP);
+    else
+    {
+        dfaAllocExceptions(0);
+        dfaStoreState(false_stateid);
+    }
     // EDGE-2. true and false
     dfaAllocExceptions(0);
     dfaStoreState(true_stateid);
