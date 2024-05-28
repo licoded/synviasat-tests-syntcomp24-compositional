@@ -509,11 +509,19 @@ void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
 {
     for (auto syn_frame_ptr : scc)
     {
+        graph.add_vertex(syn_frame_ptr->GetBddPointer());
+        if (syn_frame_ptr->get_status() == Swin ||
+            Syn_Frame::ewin_state_bdd_set.find(ull(syn_frame_ptr->GetBddPointer())) != Syn_Frame::ewin_state_bdd_set.end())
+        {
+            continue;
+        }
         vector<Syn_Edge> succ_edges;
         syn_frame_ptr->get_succ_edges(succ_edges);
         for (auto syn_edge : succ_edges)
         {
             cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
+            if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
+                continue;
             graph.add_edge(syn_frame_ptr->GetBddPointer(), syn_edge.first, syn_edge.second);
         }
     }

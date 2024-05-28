@@ -431,6 +431,8 @@ void edgeCons::get_succ_edges(vector<Syn_Edge> &succ_Y_edges)
     assert(Y_cons_.size() == X_parts_.size());
     for (int i = 0; i < Y_cons_.size(); ++i)
     {
+        if (Y_cons_[i]->get_status() == Swin)
+            break;
         aalta_formula *af_X = X_parts_[i];
         Y_cons_[i]->get_succ_Y_edges(af_X, succ_Y_edges);
     }
@@ -441,9 +443,12 @@ void YCons::get_succ_Y_edges(aalta_formula *af_X, vector<Syn_Edge> &succ_Y_edges
     assert(Y_parts_.size() == successors_.size());
     for (int i = 0; i < Y_parts_.size(); ++i)
     {
+        DdNode *succ_bdd = successors_[i];
+        if (Syn_Frame::ewin_state_bdd_set.find(ull(succ_bdd)) !=
+            Syn_Frame::ewin_state_bdd_set.end())
+            continue;
         aalta_formula *af_Y = Y_parts_[i];
         aalta_formula *af_edge = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
-        DdNode *succ_bdd = successors_[i];
         succ_Y_edges.push_back({succ_bdd, af_edge});
     }
 }
