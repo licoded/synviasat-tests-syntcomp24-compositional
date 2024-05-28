@@ -43,6 +43,8 @@ edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula *neg_
                 YCons_related_succ[ull(y_cons)] = related_succ;
             }
             Y_cons_.push_back(bdd_YCons[ull(true_node)]);
+            if (Y_cons_.back()->hasTravAllEdges())
+                insert_trav_all_afX_X_idx(Y_cons_.size() - 1);
             for (auto it : *YCons_related_succ[ull(Y_cons_.back())])
                 succ_bddP_to_idx_.insert({ull(it), Y_cons_.size() - 1});
             for (auto it : *YCons_related_succ[ull(Y_cons_.back())])
@@ -431,7 +433,7 @@ void edgeCons::get_succ_edges(vector<Syn_Edge> &succ_Y_edges)
     assert(Y_cons_.size() == X_parts_.size());
     for (int i = 0; i < Y_cons_.size(); ++i)
     {
-        if (Y_cons_[i]->get_status() == Swin)
+        if (Y_cons_[i]->get_status() == Ewin)
             break;
         aalta_formula *af_X = X_parts_[i];
         Y_cons_[i]->get_succ_Y_edges(af_X, succ_Y_edges);

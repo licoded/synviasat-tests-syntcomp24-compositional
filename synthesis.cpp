@@ -510,7 +510,7 @@ void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
     for (auto syn_frame_ptr : scc)
     {
         graph.add_vertex(syn_frame_ptr->GetBddPointer());
-        if (syn_frame_ptr->get_status() == Swin ||
+        if (syn_frame_ptr->get_status() == Ewin ||
             Syn_Frame::ewin_state_bdd_set.find(ull(syn_frame_ptr->GetBddPointer())) != Syn_Frame::ewin_state_bdd_set.end())
         {
             continue;
