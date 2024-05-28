@@ -145,8 +145,12 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         // delete init; // NOTE: WholeDFA --> init belongs to some scc --> has been deleted in forwardSearch_wholeDFA ???
     }
 
+    string wholedfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole.dfa";
+    string wholedfa2dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole_dfa2.dot";
     string wholedot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole.dot";
     printDFA(dfa, wholedot_filename, var_num, var_index);
+    dfaExport(dfa, string2char_ptr(wholedfa_filename).get(), var_num, var_names, orders.get());
+    system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
     // TODO: delete char** and char*
 
     return true;
