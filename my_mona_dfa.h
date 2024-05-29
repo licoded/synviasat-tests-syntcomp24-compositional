@@ -61,73 +61,56 @@ struct MyMonaDFA{
     vector<vector<int>> bdd;     // transition array
     string filename;
 
-    void readMyMonaDFA_core()
+    void *readMyMonaDFA(string mona_dfa_filename)
     {
         string s;
-        char ch;
         int line_num = 0;
-        ifstream inFile(filename, ios::in | ios::binary);
+        ifstream inFile(mona_dfa_filename, ios::in | ios::binary);
         bool continue_flag = true;
         while(continue_flag)
         {
-            line_num++; // start from 1
-            string &curline_pre = line_pres[line_num];
-            if (line_num < 11)
+            string &curline_pre = line_pres[line_num++];    // start from 1
+            getline(inFile, s);
+            assert(s.substr(0, curline_pre.size()) == curline_pre);
+            s = s.substr(curline_pre.size());
+            switch (line_num)
             {
-                getline(inFile, s);
-                assert(s.substr(0, curline_pre.size()) == curline_pre);
-                s = s.substr(curline_pre.size());
-                switch (line_num)
-                {
-                    case 2:
-                        vars_num = string2int(s);
-                        break;
-                    case 5:
-                        states_num = string2int(s);
-                        break;
-                    case 6:
-                        initial_stateid = string2int(s);
-                        break;
-                    case 7:
-                        trans_num = string2int(s);
-                        break;
-                    case 8:
-                        read_intlist_from_string(s, final);
-                        break;
-                    case 9:
-                        read_intlist_from_string(s, behaviour);
-                        break;
-                    case 10:
-                        /* read transitions */
-                        int x, l, r;
-                        for (int i = 0; i < trans_num; i++) {
-                            inFile >> x >> l >> r;
-                            bdd.push_back({x, l, r});
-                        }
-                        /* last line*/
-                        inFile >> s;
-                        assert(s.substr(0,3) == "end");
-                        continue_flag = false;
-                        break;
-                    default:
-                        // do nothing
-                        break;
-                }
+                case 2:
+                    vars_num = string2int(s);
+                    break;
+                case 5:
+                    states_num = string2int(s);
+                    break;
+                case 6:
+                    initial_stateid = string2int(s);
+                    break;
+                case 7:
+                    trans_num = string2int(s);
+                    break;
+                case 8:
+                    read_intlist_from_string(s, final);
+                    break;
+                case 9:
+                    read_intlist_from_string(s, behaviour);
+                    break;
+                case 10:
+                    /* read transitions */
+                    int x, l, r;
+                    for (int i = 0; i < trans_num; i++) {
+                        inFile >> x >> l >> r;
+                        bdd.push_back({x, l, r});
+                    }
+                    /* last line*/
+                    inFile >> s;
+                    assert(s.substr(0,3) == "end");
+                    continue_flag = false;
+                    break;
+                default:
+                    // do nothing
+                    break;
             }
         }
         inFile.close();
-    }
-
-    void *readMyMonaDFA(string dfa_filename)
-    {
-        filename = dfa_filename;
-        // FILE* original_stdin = stdin;
-        // stdin = fopen(dfa_filename.c_str(), "r");
-        // === real code BEGIN
-        readMyMonaDFA_core();
-        // === real code END
-        // fclose(stdin);
-        // stdin = original_stdin;
     }
 };
 
