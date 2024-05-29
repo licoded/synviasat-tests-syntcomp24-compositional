@@ -10,6 +10,7 @@
 #include "formula_in_bdd.h"
 #include "syn_type.h"
 #include "graph.h"
+#include "my_mona_dfa.h"
 #include "deps/CUDD-install/include/cudd.h"
 
 using namespace std;
@@ -21,6 +22,8 @@ extern bool WholeDFA_FLAG;
 typedef unsigned long long ull;
 using Syn_Edge = pair<DdNode *, aalta_formula *>;
 using Syn_Graph = MyGraph<DdNode *, aalta_formula *>;
+using MonaDFA_Edge = pair<int, aalta_formula *>;
+using MonaDFA_Graph = MyGraph<int, aalta_formula *>;
 
 // main entry
 bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, bool verbose);
@@ -101,6 +104,8 @@ bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
 void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
 void printGraph(Syn_Graph &graph);
 shared_ptr<char> af2binaryString(aalta_formula *af);
+
+void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);

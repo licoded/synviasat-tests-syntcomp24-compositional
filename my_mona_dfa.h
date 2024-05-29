@@ -46,7 +46,7 @@ void read_intlist_from_string(string &s, vector<int> &res)
     }
 }
 
-bool isEnd(int *arr)
+bool isEnd(vector<int> &arr)
 {
     return arr[0] == -1 && arr[2] == 0;
 }

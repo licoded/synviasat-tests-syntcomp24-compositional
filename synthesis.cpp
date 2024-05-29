@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
+#include <stack>
 #include <algorithm>
 
 extern "C" {
@@ -151,6 +152,10 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     printDFA(dfa, wholedot_filename, var_num, var_index);
     dfaExport(dfa, string2char_ptr(wholedfa_filename).get(), var_num, var_names, orders.get());
     system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
+
+    MyMonaDFA my_dfa;
+    my_dfa.readMyMonaDFA(wholedfa_filename);
+
     // TODO: delete char** and char*
 
     return true;
@@ -628,6 +633,43 @@ void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_in
     // === real code END
     fclose(stdout);
     stdout = original_stdout;
+}
+
+void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
+{
+    for (int i = 0; i < dfa.states_num; i++)
+    {
+        vector<MonaDFA_Edge> cur_succ_edges;
+        /* non-recursive DFS getEdge */
+        stack<pair<int, aalta_formula *>> state_search_sta;
+        state_search_sta.push({i, NULL});   // cur_bdd_id, pre_formula
+        while(!state_search_sta.empty())
+        {
+            auto top_item = state_search_sta.top();
+            state_search_sta.pop();
+            vector<int> &cur_bdd = dfa.bdd[top_item.first];
+            if (isEnd(cur_bdd))
+            {
+                int succ_state_id = cur_bdd[1];
+                if (top_item.second == NULL)
+                    top_item.second = aalta_formula::TRUE();
+                // graph.add_edge(i, cur_bdd[1], top_item.second);
+                cur_succ_edges.push_back({succ_state_id, top_item.second});
+            }
+            else
+            {
+                int x = cur_bdd[0], l = cur_bdd[1], r = cur_bdd[2];
+                aalta_formula *cur_var = aalta_formula(x+12, NULL, NULL).unique();   // TODO: ensure 12!!!
+                aalta_formula *not_cur = aalta_formula(aalta_formula::Not, cur_var, NULL).unique();
+                state_search_sta.push({l, aalta_formula(aalta_formula::And, top_item.second, not_cur).unique()});
+                state_search_sta.push({r, aalta_formula(aalta_formula::And, top_item.second, cur_var).unique()});
+            }
+        }
+        /* add to Graph */
+        graph.add_vertex(i);
+        for (auto edge : cur_succ_edges)
+            graph.add_edge(i, edge.first, edge.second);
+    }
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)
