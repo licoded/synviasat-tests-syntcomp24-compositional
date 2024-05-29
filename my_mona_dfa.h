@@ -7,9 +7,24 @@
 #include <string>
 using namespace std;
 
+string line_pres[] = {
+    "",
+    "MONA DFA",
+    "number of variables: ",
+    "variables: ",
+    "orders: ", // NOT USED
+    "states: ",
+    "initial: ",
+    "bdd nodes: ",
+    "final: ",
+    "behaviour: ",
+    "bdd:",
+};
+
 int string2int(string s)
 {
     int res = 0;
+    if (s[0] == '-') return -string2int(s.substr(1));
     for (int i = 0; i < s.size(); i++)
     {
         res = res * 10 + s[i] - '0';
@@ -56,21 +71,7 @@ struct MyMonaDFA{
         while(continue_flag)
         {
             line_num++; // start from 1
-            string line_pres[] = {
-                "",
-                "MONA DFA",
-                "number of variables: ",
-                "variables: ",
-                "orders: ", // NOT USED
-                "states: ",
-                "initial: ",
-                "bdd nodes: ",
-                "final: ",
-                "behaviour: ",
-                "bdd:",
-            };
             string &curline_pre = line_pres[line_num];
-
             if (line_num < 11)
             {
                 getline(inFile, s);
@@ -100,11 +101,11 @@ struct MyMonaDFA{
                         /* read transitions */
                         int x, l, r;
                         for (int i = 0; i < trans_num; i++) {
-                            cin >> x >> l >> r;
+                            inFile >> x >> l >> r;
                             bdd.push_back({x, l, r});
                         }
                         /* last line*/
-                        cin >> s;
+                        inFile >> s;
                         assert(s.substr(0,3) == "end");
                         continue_flag = false;
                         break;
