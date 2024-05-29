@@ -1,6 +1,7 @@
 #ifndef __MY_MONA_DFA__
 #define __MY_MONA_DFA__
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <assert.h>
 #include <string>
@@ -42,14 +43,17 @@ struct MyMonaDFA{
     int initial_stateid;
     vector<int> final;      // type of each state
     vector<int> behaviour;  // first move of each state
-    vector<int[3]> bdd;     // transition array
+    vector<vector<int>> bdd;     // transition array
+    string filename;
 
     void readMyMonaDFA_core()
     {
         string s;
         char ch;
         int line_num = 0;
-        while(true)
+        ifstream inFile(filename, ios::in | ios::binary);
+        bool continue_flag = true;
+        while(continue_flag)
         {
             line_num++; // start from 1
             string line_pres[] = {
@@ -69,7 +73,7 @@ struct MyMonaDFA{
 
             if (line_num < 11)
             {
-                getline(cin, s); cin.get(ch);
+                getline(inFile, s);
                 assert(s.substr(0, curline_pre.size()) == curline_pre);
                 s = s.substr(curline_pre.size());
                 switch (line_num)
@@ -102,6 +106,7 @@ struct MyMonaDFA{
                         /* last line*/
                         cin >> s;
                         assert(s.substr(0,3) == "end");
+                        continue_flag = false;
                         break;
                     default:
                         // do nothing
@@ -109,17 +114,19 @@ struct MyMonaDFA{
                 }
             }
         }
+        inFile.close();
     }
 
-    void *readMyMonaDFA(string &dot_filename)
+    void *readMyMonaDFA(string dfa_filename)
     {
-        FILE* original_stdout = stdout;
-        stdout = fopen(dot_filename.c_str(), "w");
+        filename = dfa_filename;
+        // FILE* original_stdin = stdin;
+        // stdin = fopen(dfa_filename.c_str(), "r");
         // === real code BEGIN
         readMyMonaDFA_core();
         // === real code END
-        fclose(stdout);
-        stdout = original_stdout;
+        // fclose(stdin);
+        // stdin = original_stdin;
     }
 };
 
