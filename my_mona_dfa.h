@@ -61,7 +61,7 @@ struct MyMonaDFA{
     vector<vector<int>> bdd;     // transition array
     string filename;
 
-    void *readMyMonaDFA(string mona_dfa_filename)
+    void readMyMonaDFA(string mona_dfa_filename)
     {
         string s;
         int line_num = 0;
