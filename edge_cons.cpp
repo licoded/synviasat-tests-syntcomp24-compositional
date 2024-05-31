@@ -10,7 +10,7 @@
 #include "preprocess.h"
 
 edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula *acc_edge)
-    : state_af_(state_af), blocked_Y_(aalta_formula::TRUE()),
+    : state_af_(state_af), blocked_Y_(aalta_formula::TRUE()), traved_Y_(aalta_formula::FALSE()),
       status_(Dfs_incomplete), current_Y_idx_(-1)
 {
     unordered_map<ull, XCons *> bdd_XCons;
@@ -44,8 +44,12 @@ edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula *acc_
                 XCons_related_succ[ull(x_cons)] = related_succ;
             }
             X_cons_.push_back(bdd_XCons[ull(true_node)]);
+            if (X_cons_.back()->hasTravAllEdges())
+                insert_trav_all_afY_Y_idx(X_cons_.size() - 1);
             for (auto it : *XCons_related_succ[ull(X_cons_.back())])
                 succ_bddP_to_idx_.insert({ull(it), X_cons_.size() - 1});
+             for (auto it : *XCons_related_succ[ull(X_cons_.back())])
+                succ_bddP_to_idx_vec_.push_back({ull(it), X_cons_.size() - 1});
             continue;
         }
 
@@ -90,7 +94,8 @@ edgeCons::~edgeCons()
 }
 
 XCons::XCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_formula *af_Y)
-    : current_X_idx_(-1), status_(Dfs_incomplete) // blocked_X_(aalta_formula::TRUE())
+    : current_X_idx_(-1), status_(Dfs_incomplete), // blocked_X_(aalta_formula::TRUE())
+        swin_X_(aalta_formula::FALSE()), traved_X_(aalta_formula::FALSE())
 {
     queue<tuple<DdNode *, aalta_formula *, bool>> q;
     q.push({root, NULL, false});
@@ -124,7 +129,8 @@ XCons::XCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
                 Syn_Frame::ewin_state_bdd_set.find(ull(succ_state_bdd)) != Syn_Frame::ewin_state_bdd_set.end())
             {
                 status_ = Ewin;
-                return;
+                insert_trav_all_afX_X_idx(X_parts_.size() - 1);
+                continue; // NOTE: cannot insert to succ_bddP_to_idx_ as will ERROR when dtor (e, but adding a judge in dtor is OK)
             }
             else if (Syn_Frame::swin_state_bdd_set.find(ull(succ_state_bdd)) != Syn_Frame::swin_state_bdd_set.end())
                 insert_swin_X_idx(X_parts_.size() - 1);
@@ -163,13 +169,27 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
+        {
             insert_ewin_Y_idx(it->second);
+            X_cons_[it->second]->processSignal(To_swin, succ);
+            // NOTE: the following codes are useless, as we only need do in edgeCons::getEdge_wholeDFA
+            // if (X_cons_[it->second]->hasTravAllEdges())
+            // {
+            //     insert_trav_all_afY_Y_idx(it->second);
+            // }
+        }
         if (ewin_Y_idx_.size() == Y_parts_.size())
             status_ = Ewin;
         else if ((ewin_Y_idx_.size() + dfs_complete_Y_idx_.size()) ==
                  Y_parts_.size())
             status_ = Dfs_complete;
-        current_Y_idx_ = -1;
+        if (!WholeDFA_FLAG)
+            current_Y_idx_ = -1;
+        else
+        {
+            if (trav_all_afY_Y_idx_.find(current_Y_idx_) != trav_all_afY_Y_idx_.end())
+                current_Y_idx_ = -1;
+        }
     }
     else if (sig == To_swin)
     {
@@ -226,8 +246,22 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
 
 void XCons::processSignal(Signal sig, DdNode *succ)
 {
-    assert(sig != To_ewin && sig != Unsat);
-    if (sig == To_swin)
+    assert(sig != Unsat);
+    // assert(sig != To_ewin && sig != Unsat);
+    if (sig == To_ewin)
+    {
+        status_ = Ewin;
+        if (WholeDFA_FLAG)
+        {
+            auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+            for (auto it = range.first; it != range.second; ++it)
+            {
+                insert_swin_X_idx(it->second);
+                insert_trav_all_afX_X_idx(it->second);
+            }
+        }
+    }
+    else if (sig == To_swin)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
@@ -310,6 +344,11 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
                         current_Y_idx_ = i;
                         break;
                     }
+            if (current_Y_idx_ == -1)
+            {
+                processSignal(Unsat, NULL);
+                return false;
+            }
         }
     }
     aalta_formula *af_Y = Y_parts_[current_Y_idx_];
@@ -319,6 +358,36 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
     // cout<<edge_af->to_string()<<endl;
     fill_in_edgeset(edge);
     return true;
+}
+
+
+bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)
+{
+    aalta_formula *edge_af = NULL;
+    if (current_Y_idx_ == -1)
+        for (int i = 0; i < Y_parts_.size(); ++i)
+        {
+            if (X_cons_[i]->hasTravAllEdges())
+                insert_trav_all_afY_Y_idx(i);
+            if (trav_all_afY_Y_idx_.find(i) == trav_all_afY_Y_idx_.end())
+            {
+                current_Y_idx_ = i;
+                break;
+            }
+        }
+    if (current_Y_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return false;
+    }
+    aalta_formula *af_X = Y_parts_[current_Y_idx_];
+    aalta_formula *af_Y = X_cons_[current_Y_idx_]->getEdge_wholeDFA();
+    edge_af = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
+    edge_af = edge_af->simplify();
+    edge_af->to_set(edge);
+    // cout<<edge_af->to_string()<<endl;
+    fill_in_edgeset(edge);
+    return true; 
 }
 
 aalta_formula *XCons::getEdge()
@@ -331,7 +400,56 @@ aalta_formula *XCons::getEdge()
             current_X_idx_ = i;
             break;
         }
+    if (current_X_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return NULL;
+    }
     return X_parts_[current_X_idx_];
+}
+
+aalta_formula *XCons::getEdge_wholeDFA()
+{
+    assert(!SAT_TRACE_FLAG && current_X_idx_ == -1);
+    for (int i = 0; i < X_parts_.size(); ++i)
+        if (trav_all_afX_X_idx_.find(i) == trav_all_afX_X_idx_.end())
+        {
+            current_X_idx_ = i;
+            break;
+        }
+    if (current_X_idx_ == -1)
+    {
+        processSignal(Unsat, NULL);
+        return NULL;
+    }
+    return X_parts_[current_X_idx_];
+}
+
+void edgeCons::get_succ_edges(vector<Syn_Edge> &succ_X_edges)
+{
+    assert(X_cons_.size() == Y_parts_.size());
+    for (int i = 0; i < X_cons_.size(); ++i)
+    {
+        if (X_cons_[i]->get_status() == Ewin)
+            break;
+        aalta_formula *af_Y = Y_parts_[i];
+        X_cons_[i]->get_succ_Y_edges(af_Y, succ_X_edges);
+    }
+}
+
+void XCons::get_succ_Y_edges(aalta_formula *af_Y, vector<Syn_Edge> &succ_X_edges)
+{
+    assert(X_parts_.size() == successors_.size());
+    for (int i = 0; i < X_parts_.size(); ++i)
+    {
+        DdNode *succ_bdd = successors_[i];
+        if (Syn_Frame::ewin_state_bdd_set.find(ull(succ_bdd)) !=
+            Syn_Frame::ewin_state_bdd_set.end())
+            continue;
+        aalta_formula *af_X = X_parts_[i];
+        aalta_formula *af_edge = aalta_formula(aalta_formula::And, af_X, af_Y).unique();
+        succ_X_edges.push_back({succ_bdd, af_edge});
+    }
 }
 
 // aalta_formula *edgeCons::set_search_direction(const pair<aalta_formula *, aalta_formula *> &XY)
@@ -388,6 +506,15 @@ int edgeCons::find_match_Y_idx(aalta_formula *Y)
     assert(false);
 }
 
+void edgeCons::insert_trav_all_afY_Y_idx(int y)
+{
+    if (trav_all_afY_Y_idx_.find(y) == trav_all_afY_Y_idx_.end())
+    {
+        trav_all_afY_Y_idx_.insert(y);
+        traved_Y_ = (aalta_formula(aalta_formula::Or, traved_Y_, Y_parts_[y]).simplify())->unique();
+    }
+}
+
 void edgeCons::insert_ewin_Y_idx(int y)
 {
     if (ewin_Y_idx_.find(y) == ewin_Y_idx_.end())
@@ -423,6 +550,25 @@ void XCons::insert_searched_X_idx(int x)
     {
         searched_X_idx_.insert(x);
         // aalta_formula *not_X = aalta_formula(aalta_formula::Not, NULL, X_parts_[x]).nnf();
+        // blocked_X_ = (aalta_formula(aalta_formula::And, blocked_X_, not_X).simplify())->unique();
+    }
+}
+
+void XCons::insert_trav_all_afX_X_idx(int x)
+{
+    if (trav_all_afX_X_idx_.find(x) == trav_all_afX_X_idx_.end())
+    {
+        trav_all_afX_X_idx_.insert(x);
+        traved_X_ = (aalta_formula(aalta_formula::Or, traved_X_, X_parts_[x]).simplify())->unique();
+    }
+}
+void XCons::insert_swin_X_idx(int x)
+{
+    if (swin_X_idx_.find(x) == swin_X_idx_.end())
+    {
+        swin_X_idx_.insert(x);
+        swin_X_ = (aalta_formula(aalta_formula::Or, swin_X_, X_parts_[x]).simplify())->unique();
+        aalta_formula *not_X = aalta_formula(aalta_formula::Not, NULL, X_parts_[x]).nnf();
         // blocked_X_ = (aalta_formula(aalta_formula::And, blocked_X_, not_X).simplify())->unique();
     }
 }

@@ -15,6 +15,7 @@ using namespace std;
 using namespace aalta;
 
 extern bool SAT_TRACE_FLAG;
+extern bool WholeDFA_FLAG;
 
 typedef unsigned long long ull;
 
