@@ -1,0 +1,227 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 12.17      4.60     4.60     3938     1.17     2.07  Minisat::Solver::solve_()
+ 11.41      8.92     4.32 282028950     0.00     0.00  Minisat::Solver::newVar(bool, bool) [clone .constprop.63]
+ 10.47     12.88     3.96                             __memcpy_avx_unaligned_erms
+  7.46     15.70     2.82 282265082     0.00     0.00  Minisat::vec<int>::capacity(int)
+  5.29     17.70     2.00     3960     0.51     0.51  Minisat::Solver::simplify() [clone .part.62]
+  5.22     19.67     1.98 564057900     0.00     0.00  Minisat::vec<Minisat::vec<Minisat::Solver::Watcher> >::growTo(int) [clone .part.64] [clone .lto_priv.155]
+  4.55     21.39     1.72 377015787     0.00     0.00  Minisat::Solver::propagate()
+  3.99     22.90     1.51     1954     0.77     0.78  aalta::Solver::get_transition()
+  2.59     23.88     0.98                             _int_malloc
+  2.33     24.76     0.88     3967     0.22     0.22  Minisat::Solver::~Solver()
+  2.22     25.60     0.84                             __gcc_personality_v0
+  2.17     26.42     0.82                             __fentry__
+  2.17     27.24     0.82 377015798     0.00     0.00  Minisat::OccLists<Minisat::Lit, Minisat::vec<Minisat::Solver::Watcher>, Minisat::Solver::WatcherDeleted>::cleanAll()
+  1.97     27.99     0.75                             cuddUniqueInter
+  1.80     28.67     0.68 84737308     0.00     0.00  aalta::aalta_formula::unique()
+  1.60     29.27     0.61 564291738     0.00     0.00  Minisat::vec<char>::capacity(int)
+  1.40     29.80     0.53                             malloc_consolidate
+  1.40     30.33     0.53                             free
+  1.31     30.83     0.50                             cuddRehash
+  1.16     31.27     0.44                             cuddReclaim
+  0.95     31.63     0.36     5886     0.06     0.13  aalta::olg_item::get_pos(int)
+  0.90     31.97     0.34 286799622     0.00     0.00  Minisat::vec<Minisat::Lit>::capacity(int)
+  0.82     32.28     0.31                             __memset_avx2_unaligned_erms
+  0.75     32.56     0.29                             malloc
+  0.74     32.84     0.28                             Cudd_RecursiveDeref
+  0.74     33.12     0.28  6970939     0.00     0.00  aalta::olg_item::olg_item(aalta::aalta_formula::opkind, int, aalta::olg_item*, aalta::olg_item*, aalta::olg_atom*) [clone .constprop.31]
+  0.63     33.36     0.24                             cuddCacheLookup2
+  0.53     33.56     0.20  6970939     0.00     0.00  std::_Rb_tree<aalta::olg_item*, aalta::olg_item*, std::_Identity<aalta::olg_item*>, std::less<aalta::olg_item*>, std::allocator<aalta::olg_item*> >::erase(aalta::olg_item* const&) [clone .constprop.39]
+  0.50     33.75     0.19                             __memset_avx2_erms
+  0.49     33.94     0.19    98543     0.00     0.00  FormulaProgression(aalta::aalta_formula*, std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&)
+  0.48     34.12     0.18 10016098     0.00     0.00  std::tr1::_Hashtable<int, int, std::allocator<int>, std::_Identity<int>, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::operator=(std::tr1::_Hashtable<int, int, std::allocator<int>, std::_Identity<int>, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true> const&)
+  0.42     34.28     0.16                             std::_Rb_tree_rebalance_for_erase(std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)
+  0.42     34.44     0.16                             std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)
+  0.42     34.60     0.16                             brk
+  0.34     34.73     0.13                             std::_Rb_tree_increment(std::_Rb_tree_node_base*)
+  0.32     34.85     0.12     2550     0.05     0.08  aalta::olg_item::proj(int, int)
+  0.29     34.96     0.11 20038100     0.00     0.00  std::tr1::_Hashtable<int, int, std::allocator<int>, std::_Identity<int>, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::~_Hashtable() [clone .lto_priv.158]
+  0.29     35.07     0.11                             open64
+  0.24     35.16     0.09                             cuddBddAndRecur
+  0.21     35.24     0.08     1978     0.04     0.17  aalta::olg_formula::~olg_formula()
+  0.20     35.31     0.08  7486674     0.00     0.00  aalta::aalta_formula::is_conflict(aalta::aalta_formula*, aalta::aalta_formula*)
+  0.19     35.38     0.07                             _int_free
+  0.19     35.45     0.07  5672122     0.00     0.00  std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_erase(std::_Rb_tree_node<int>*)
+  0.19     35.52     0.07  2033736     0.00     0.00  aalta::AaltaSolver::add_clause(std::vector<int, std::allocator<int> >&)
+  0.19     35.59     0.07   669740     0.00     0.00  std::_Hashtable<unsigned long long, std::pair<unsigned long long const, std::vector<DdNode*, std::allocator<DdNode*> >*>, std::allocator<std::pair<unsigned long long const, std::vector<DdNode*, std::allocator<DdNode*> >*> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_find_node(unsigned long, unsigned long long const&, unsigned long) const [clone .isra.425] [clone .lto_priv.176]
+  0.19     35.66     0.07     1983     0.04     5.19  aalta::Solver::add_clauses_for(aalta::aalta_formula*)
+  0.16     35.72     0.06  3523500     0.00     0.00  Minisat::Solver::attachClause(unsigned int)
+  0.16     35.78     0.06  1599860     0.00     0.00  aalta::Solver::coi_merge(std::set<int, std::less<int>, std::allocator<int> >&, std::set<int, std::less<int>, std::allocator<int> >&) [clone .isra.288] [clone .lto_priv.216]
+  0.16     35.84     0.06   113328     0.00     0.00  fill_in_edgeset(std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&) [clone .part.98]
+  0.16     35.90     0.06 17600775     0.00     0.00  aalta::aalta_formula::aalta_formula(int, aalta::aalta_formula*, aalta::aalta_formula*, std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*) [clone .constprop.121]
+  0.16     35.96     0.06  2610248     0.00     0.00  std::tr1::_Hashtable<aalta::aalta_formula*, aalta::aalta_formula*, std::allocator<aalta::aalta_formula*>, std::_Identity<aalta::aalta_formula*>, std::equal_to<aalta::aalta_formula*>, aalta::aalta_formula::af_prt_hash, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::_M_allocate_buckets(unsigned long) [clone .isra.149] [clone .lto_priv.131]
+  0.16     36.02     0.06                             void Minisat::sort<unsigned int, reduceDB_lt>(unsigned int*, int, reduceDB_lt)
+  0.15     36.08     0.06 10012190     0.00     0.00  void std::tr1::_Hashtable<int, int, std::allocator<int>, std::_Identity<int>, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::insert<std::tr1::__detail::_Hashtable_iterator<int, true, false> >(std::tr1::__detail::_Hashtable_iterator<int, true, false>, std::tr1::__detail::_Hashtable_iterator<int, true, false>)
+  0.15     36.13     0.06  7173950     0.00     0.00  int Minisat::parseInt<Minisat::StreamBuffer>(Minisat::StreamBuffer&)
+  0.13     36.18     0.05  3943736     0.00     0.00  Minisat::Solver::addClause_(Minisat::vec<Minisat::Lit>&) [clone .part.69]
+  0.13     36.23     0.05     3946     0.01     0.02  aalta::olg_item::toDimacsPlus(_IO_FILE*)
+  0.13     36.28     0.05     1984     0.03     2.99  aalta::olg_item::SATCall()
+  0.13     36.33     0.05     1984     0.03     0.11  void Minisat::parse_DIMACS<Minisat::Solver>(gzFile_s*, Minisat::Solver&)
+  0.13     36.38     0.05     1983     0.03     0.09  aalta::Solver::compute_full_coi(aalta::aalta_formula*, std::vector<int, std::allocator<int> >&)
+  0.13     36.43     0.05     1983     0.03     5.32  aalta::Solver::Solver(aalta::aalta_formula*, bool, bool, bool)
+  0.13     36.48     0.05     1978     0.03     0.07  aalta::aalta_formula::~aalta_formula()
+  0.13     36.53     0.05     1954     0.03     0.03  aalta::AaltaSolver::SAT_lit(int)
+  0.13     36.58     0.05                             memalign_hook_ini
+  0.12     36.63     0.05                             __malloc_check_init
+  0.12     36.67     0.05      167     0.27     0.27  std::_Deque_base<std::tuple<DdNode*, aalta::aalta_formula*, bool>, std::allocator<std::tuple<DdNode*, aalta::aalta_formula*, bool> > >::_M_initialize_map(unsigned long) [clone .constprop.67]
+  0.11     36.71     0.04  1669736     0.00     0.00  std::_Hashtable<unsigned long long, std::pair<unsigned long long const, int>, std::allocator<std::pair<unsigned long long const, int> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, false> >::_M_insert_multi_node(std::__detail::_Hash_node<std::pair<unsigned long long const, int>, false>*, unsigned long, std::__detail::_Hash_node<std::pair<unsigned long long const, int>, false>*)
+  0.11     36.75     0.04    81860     0.00     0.00  Minisat::vec<Minisat::lbool>::capacity(int)
+  0.11     36.79     0.04                             operator new(unsigned long)
+  0.11     36.83     0.04                             __cxa_free_dependent_exception
+  0.11     36.87     0.04                             close
+  0.11     36.91     0.04                             vfprintf
+  0.09     36.95     0.04  5284796     0.00     0.00  std::tr1::_Hashtable<int, int, std::allocator<int>, std::_Identity<int>, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::_M_insert(int const&, std::tr1::integral_constant<bool, true>) [clone .isra.80] [clone .lto_priv.199]
+  0.08     36.98     0.03  3466459     0.00     0.00  std::tr1::__detail::_Map_base<int, std::pair<int const, int>, std::_Select1st<std::pair<int const, int> >, true, std::tr1::_Hashtable<int, std::pair<int const, int>, std::allocator<std::pair<int const, int> >, std::_Select1st<std::pair<int const, int> >, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, false, true> >::operator[](int const&) [clone .isra.195] [clone .lto_priv.192]
+  0.08     37.01     0.03  1502590     0.00     0.00  std::_Rb_tree_node<int>* std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_copy<std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_Alloc_node>(std::_Rb_tree_node<int> const*, std::_Rb_tree_node_base*, std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_Alloc_node&)
+  0.08     37.04     0.03  1428391     0.00     0.00  std::tr1::_Hashtable<aalta::aalta_formula*, aalta::aalta_formula*, std::allocator<aalta::aalta_formula*>, std::_Identity<aalta::aalta_formula*>, std::equal_to<aalta::aalta_formula*>, aalta::aalta_formula::af_prt_hash, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::_M_insert(aalta::aalta_formula* const&, std::tr1::integral_constant<bool, true>) [clone .isra.173] [clone .lto_priv.218]
+  0.08     37.07     0.03   213593     0.00     0.00  aalta::olg_formula::build(aalta::aalta_formula const*)
+  0.08     37.10     0.03     1983     0.02     0.25  aalta::CARSolver::~CARSolver()
+  0.08     37.13     0.03     1955     0.02     0.08  aalta::aalta_formula::add_tail()
+  0.08     37.16     0.03                             __strchrnul_avx2
+  0.08     37.19     0.03     4725     0.01     0.01  aalta::aalta_formula::split(int, std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >&, bool)
+  0.08     37.22     0.03                             std::tr1::_Hashtable<std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*, std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*, std::allocator<std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*>, std::_Identity<std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*>, aalta::aalta_formula::tag_prt_eq, aalta::aalta_formula::tag_prt_hash, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::_M_deallocate_nodes(std::tr1::__detail::_Hash_node<std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*, false>**, unsigned long) [clone .isra.308] [clone .lto_priv.223]
+  0.08     37.25     0.03                             write
+  0.05     37.27     0.02  4761787     0.00     0.00  void std::vector<int, std::allocator<int> >::_M_realloc_insert<int const&>(__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >, int const&)
+  0.05     37.29     0.02  1397254     0.00     0.00  std::tr1::_Hashtable<aalta::aalta_formula*, aalta::aalta_formula*, std::allocator<aalta::aalta_formula*>, std::_Identity<aalta::aalta_formula*>, std::equal_to<aalta::aalta_formula*>, aalta::aalta_formula::af_prt_hash, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::find(aalta::aalta_formula* const&) [clone .isra.111] [clone .lto_priv.219]
+  0.05     37.31     0.02   113357     0.00     0.00  xnf(aalta::aalta_formula*)
+  0.05     37.33     0.02   113328     0.00     0.00  aalta::aalta_formula::to_set(std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&)
+  0.05     37.35     0.02    15632     0.00     0.00  aalta::aalta_formula::to_set(std::tr1::unordered_set<aalta::aalta_formula*, aalta::aalta_formula::af_prt_hash, std::equal_to<aalta::aalta_formula*>, std::allocator<aalta::aalta_formula*> >&)
+  0.05     37.37     0.02    11749     0.00     0.00  std::tr1::_Hashtable<aalta::aalta_formula*, aalta::aalta_formula*, std::allocator<aalta::aalta_formula*>, std::_Identity<aalta::aalta_formula*>, std::equal_to<aalta::aalta_formula*>, aalta::aalta_formula::af_prt_hash, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, true, true>::~_Hashtable() [clone .lto_priv.156]
+  0.05     37.39     0.02     7920     0.00     0.00  Minisat::Solver::removeSatisfied(Minisat::vec<unsigned int>&)
+  0.05     37.41     0.02     1974     0.01     0.04  aalta::olg_item::proj(int, int) [clone .constprop.30]
+  0.05     37.43     0.02      246     0.08     0.08  std::_Hashtable<unsigned long long, std::pair<unsigned long long const, std::vector<DdNode*, std::allocator<DdNode*> >*>, std::allocator<std::pair<unsigned long long const, std::vector<DdNode*, std::allocator<DdNode*> >*> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::~_Hashtable()
+  0.05     37.45     0.02                             Syn_Frame::Syn_Frame(aalta::aalta_formula*)
+  0.05     37.47     0.02                             std::__detail::_Prime_rehash_policy::_M_need_rehash(unsigned long, unsigned long, unsigned long) const
+  0.05     37.49     0.02                             ___fprintf_chk
+  0.05     37.51     0.02                             _fxstat
+  0.05     37.53     0.02                             cuddAllocNode
+  0.05     37.55     0.02                             realloc
+  0.05     37.57     0.02                             sysmalloc
+  0.04     37.58     0.02   211584     0.00     0.00  aalta::aalta_formula::is_global()
+  0.03     37.59     0.01  5758281     0.00     0.00  std::_Hashtable<int, int, std::allocator<int>, std::__detail::_Identity, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_find_node(unsigned long, int const&, unsigned long) const [clone .isra.557] [clone .lto_priv.215]
+  0.03     37.60     0.01  3543853     0.00     0.00  aalta::aalta_formula::aalta_formula(int, aalta::aalta_formula*, aalta::aalta_formula*, std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >*) [clone .constprop.120]
+  0.03     37.61     0.01  1356300     0.00     0.01  aalta::AaltaSolver::add_clause(int, int)
+  0.03     37.62     0.01   751295     0.00     0.00  std::tr1::_Hashtable<int, std::pair<int const, std::set<int, std::less<int>, std::allocator<int> > >, std::allocator<std::pair<int const, std::set<int, std::less<int>, std::allocator<int> > > >, std::_Select1st<std::pair<int const, std::set<int, std::less<int>, std::allocator<int> > > >, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, false, true>::_M_insert(std::pair<int const, std::set<int, std::less<int>, std::allocator<int> > > const&, std::tr1::integral_constant<bool, true>) [clone .isra.293] [clone .lto_priv.217]
+  0.03     37.63     0.01   113357     0.00     0.00  FormulaInBdd::FormulaInBdd(aalta::aalta_formula*)
+  0.03     37.64     0.01     3871     0.00     0.03  aalta::aalta_formula::remove_wnext()
+  0.03     37.65     0.01     1984     0.01     0.01  aalta::olg_item::setId(int&)
+  0.03     37.66     0.01     1984     0.01     0.01  aalta::olg_item::getVars(int&)
+  0.03     37.67     0.01     1983     0.01     0.01  aalta::Solver::build_X_map_priliminary(aalta::aalta_formula*)
+  0.03     37.68     0.01     1978     0.01     0.01  aalta::aalta_formula::is_wnext_free()
+  0.03     37.69     0.01        5     2.00     2.00  std::unordered_map<int, unsigned long long, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, unsigned long long> > >::~unordered_map() [clone .lto_priv.170]
+  0.03     37.70     0.01                             _IO_file_xsputn
+  0.03     37.71     0.01                             std::ostream::operator<<(short)
+  0.03     37.72     0.01                             std::locale::_Impl::~_Impl()
+  0.03     37.73     0.01                             std::unexpected()
+  0.03     37.74     0.01                             int std::__int_to_char<char, unsigned long>(char*, unsigned long, char const*, std::_Ios_Fmtflags, bool)
+  0.03     37.75     0.01                             std::local_Rb_tree_decrement(std::_Rb_tree_node_base*)
+  0.03     37.76     0.01                             _exit
+  0.03     37.77     0.01                             _int_realloc
+  0.03     37.78     0.01                             _itoa_word
+  0.03     37.79     0.01                             mmap
+  0.01     37.80     0.01    62165     0.00     0.00  std::_Hashtable<unsigned long long, std::pair<unsigned long long const, XCons*>, std::allocator<std::pair<unsigned long long const, XCons*> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_insert_unique_node(unsigned long, unsigned long, std::__detail::_Hash_node<std::pair<unsigned long long const, XCons*>, false>*)
+  0.01     37.80     0.01     1430     0.00     0.00  void std::vector<DdNode*, std::allocator<DdNode*> >::_M_realloc_insert<DdNode* const&>(__gnu_cxx::__normal_iterator<DdNode**, std::vector<DdNode*, std::allocator<DdNode*> > >, DdNode* const&)
+  0.01     37.81     0.01      974     0.01     0.01  aalta::aalta_formula::simplify_or(aalta::aalta_formula*, aalta::aalta_formula*)
+  0.01     37.81     0.01        4     1.25     1.25  std::unordered_set<unsigned long long, std::hash<unsigned long long>, std::equal_to<unsigned long long>, std::allocator<unsigned long long> >::~unordered_set()
+  0.00     37.81     0.00  4176408     0.00     0.00  aalta::aalta_formula::TRUE()
+  0.00     37.81     0.00  3678435     0.00     0.00  aalta::aalta_formula::FALSE()
+  0.00     37.81     0.00  3536432     0.00     0.00  Minisat::RegionAllocator<unsigned int>::capacity(unsigned int)
+  0.00     37.81     0.00   886643     0.00     0.00  std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_get_insert_unique_pos(int const&)
+  0.00     37.81     0.00   752636     0.00     0.00  std::tr1::_Hashtable<int, std::pair<int const, aalta::aalta_formula*>, std::allocator<std::pair<int const, aalta::aalta_formula*> >, std::_Select1st<std::pair<int const, aalta::aalta_formula*> >, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, false, true>::_M_insert(std::pair<int const, aalta::aalta_formula*> const&, std::tr1::integral_constant<bool, true>) [clone .isra.222] [clone .lto_priv.220]
+  0.00     37.81     0.00   751290     0.00     0.00  aalta::Solver::build_formula_map(aalta::aalta_formula*)
+  0.00     37.81     0.00   718843     0.00     0.00  std::__detail::_Map_base<unsigned long long, std::pair<unsigned long long const, unsigned long long>, std::allocator<std::pair<unsigned long long const, unsigned long long> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](unsigned long long&&) [clone .constprop.76]
+  0.00     37.81     0.00   677436     0.00     0.02  aalta::AaltaSolver::add_equivalence(int, int, int)
+  0.00     37.81     0.00   533076     0.00     0.00  aalta::aalta_formula::release_free() const
+  0.00     37.81     0.00   324269     0.00     0.00  void std::deque<std::tuple<DdNode*, aalta::aalta_formula*, bool>, std::allocator<std::tuple<DdNode*, aalta::aalta_formula*, bool> > >::emplace_back<std::tuple<DdNode*, aalta::aalta_formula*, bool> >(std::tuple<DdNode*, aalta::aalta_formula*, bool>&&)
+  0.00     37.81     0.00   309738     0.00     0.00  std::vector<int, std::allocator<int> >::push_back(int const&)
+  0.00     37.81     0.00   196464     0.00     0.00  void std::vector<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >::_M_realloc_insert<aalta::aalta_formula*>(__gnu_cxx::__normal_iterator<aalta::aalta_formula**, std::vector<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> > >, aalta::aalta_formula*&&)
+  0.00     37.81     0.00   122768     0.00     0.00  to_conjunts(aalta::aalta_formula*, std::vector<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >&)
+  0.00     37.81     0.00   113328     0.00     0.00  IsAcc(aalta::aalta_formula*, std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&)
+  0.00     37.81     0.00    98769     0.00     0.00  std::_Hashtable<unsigned long long, unsigned long long, std::allocator<unsigned long long>, std::__detail::_Identity, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_find_node(unsigned long, unsigned long long const&, unsigned long) const [clone .isra.409] [clone .lto_priv.177]
+  0.00     37.81     0.00    95727     0.00     0.00  std::tr1::__detail::_Prime_rehash_policy::_M_need_rehash(unsigned long, unsigned long, unsigned long) const [clone .part.159] [clone .lto_priv.194]
+  0.00     37.81     0.00    76968     0.00     0.00  std::tr1::_Hashtable<int, std::pair<int const, int>, std::allocator<std::pair<int const, int> >, std::_Select1st<std::pair<int const, int> >, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, false, true>::_M_insert_bucket(std::pair<int const, int> const&, unsigned long, unsigned long)
+  0.00     37.81     0.00    75217     0.00     0.00  std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_Rb_tree(std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> > const&) [clone .lto_priv.201]
+  0.00     37.81     0.00    67186     0.00     0.00  std::pair<std::_Rb_tree_iterator<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> >, bool> std::_Rb_tree<aalta::aalta_formula*, std::pair<aalta::aalta_formula* const, aalta::aalta_formula*>, std::_Select1st<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> >, std::less<aalta::aalta_formula*>, std::allocator<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> > >::_M_insert_unique<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> >(std::pair<aalta::aalta_formula* const, aalta::aalta_formula*>&&) [clone .constprop.73]
+  0.00     37.81     0.00    63639     0.00     0.00  FormulaInBdd::ConstructBdd(aalta::aalta_formula*)
+  0.00     37.81     0.00    56185     0.00     0.00  std::pair<std::_Rb_tree_iterator<int>, bool> std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_insert_unique<int>(int&&)
+  0.00     37.81     0.00    38637     0.00     0.00  void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<char*>(char*, char*, std::forward_iterator_tag) [clone .isra.52] [clone .lto_priv.229]
+  0.00     37.81     0.00    36584     0.00     0.00  aalta::Solver::add_X_conflict_for_pair(std::pair<int, int>&)
+  0.00     37.81     0.00    36316     0.00     0.00  aalta::aalta_formula::to_string[abi:cxx11]() const
+  0.00     37.81     0.00    15806     0.00     0.00  std::tr1::__detail::_Prime_rehash_policy::_M_next_bkt(unsigned long) const
+  0.00     37.81     0.00    12692     0.00     0.00  aalta::aalta_formula::nnf()
+  0.00     37.81     0.00     9354     0.00     0.00  void std::__adjust_heap<aalta::aalta_formula**, long, aalta::aalta_formula*, __gnu_cxx::__ops::_Iter_less_iter>(aalta::aalta_formula**, long, long, aalta::aalta_formula*, __gnu_cxx::__ops::_Iter_less_iter) [clone .constprop.102]
+  0.00     37.81     0.00     8954     0.00     0.00  Minisat::ClauseAllocator::reloc(unsigned int&, Minisat::ClauseAllocator&)
+  0.00     37.81     0.00     7816     0.00     0.00  aalta::aalta_formula::to_set()
+  0.00     37.81     0.00     6390     0.00     0.00  Minisat::vec<Minisat::Lit>::push(Minisat::Lit const&)
+  0.00     37.81     0.00     6111     0.00     0.00  aalta::aalta_formula::mutex(aalta::aalta_formula*, std::tr1::unordered_set<int, std::tr1::hash<int>, std::equal_to<int>, std::allocator<int> >&, std::tr1::unordered_set<int, std::tr1::hash<int>, std::equal_to<int>, std::allocator<int> >&)
+  0.00     37.81     0.00     5697     0.00     0.00  Minisat::Solver::removeClause(unsigned int)
+  0.00     37.81     0.00     5608     0.00     0.00  void std::__cxx11::list<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >::_M_insert<aalta::aalta_formula* const&>(std::_List_iterator<aalta::aalta_formula*>, aalta::aalta_formula* const&)
+  0.00     37.81     0.00     3967     0.00     0.00  Minisat::Solver::Solver()
+  0.00     37.81     0.00     2838     0.00     0.00  aalta::aalta_formula::simplify() [clone .part.536]
+  0.00     37.81     0.00     2827     0.00     0.00  aalta::aalta_formula::nnf_not()
+  0.00     37.81     0.00     2129     0.00     0.00  std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.417] [clone .lto_priv.196]
+  0.00     37.81     0.00     2111     0.00     0.00  aalta::olg_item::off_pos(int)
+  0.00     37.81     0.00     2041     0.00     0.00  std::_Rb_tree<DdNode*, DdNode*, std::_Identity<DdNode*>, std::less<DdNode*>, std::allocator<DdNode*> >::_M_erase(std::_Rb_tree_node<DdNode*>*)
+  0.00     37.81     0.00     1978     0.00     3.77  aalta::LTLfChecker::olg_unsat(aalta::aalta_formula*, bool) [clone .constprop.24]
+  0.00     37.81     0.00     1960     0.00     0.00  std::tr1::_Hashtable<int, std::pair<int const, int>, std::allocator<std::pair<int const, int> >, std::_Select1st<std::pair<int const, int> >, std::equal_to<int>, std::tr1::hash<int>, std::tr1::__detail::_Mod_range_hashing, std::tr1::__detail::_Default_ranged_hash, std::tr1::__detail::_Prime_rehash_policy, false, false, true>::~_Hashtable() [clone .lto_priv.172]
+  0.00     37.81     0.00     1956     0.00     0.00  std::vector<DdNode*, std::allocator<DdNode*> >::~vector()
+  0.00     37.81     0.00     1955     0.00     6.72  aalta::CARChecker::check() [clone .constprop.22]
+  0.00     37.81     0.00     1955     0.00     0.04  aalta::aalta_formula::split_next()
+  0.00     37.81     0.00     1954     0.00     2.89  aalta::CARChecker::sat_once(aalta::aalta_formula*)
+  0.00     37.81     0.00     1954     0.00     2.89  aalta::CARChecker::car_check(aalta::aalta_formula*)
+  0.00     37.81     0.00     1954     0.00     0.01  aalta::Solver::get_assumption_from(aalta::aalta_formula*, bool) [clone .constprop.47]
+  0.00     37.81     0.00     1954     0.00     0.01  aalta::Evidence::push(aalta::aalta_formula*) [clone .constprop.51]
+  0.00     37.81     0.00     1954     0.00     0.01  aalta::CARSolver::set_selected_assumption(aalta::aalta_formula*)
+  0.00     37.81     0.00     1948     0.00     0.00  std::tr1::__unordered_set<aalta::aalta_formula*, aalta::aalta_formula::af_prt_hash, std::equal_to<aalta::aalta_formula*>, std::allocator<aalta::aalta_formula*>, false>::__unordered_set(unsigned long, aalta::aalta_formula::af_prt_hash const&, std::equal_to<aalta::aalta_formula*> const&, std::allocator<aalta::aalta_formula*> const&) [clone .constprop.101]
+  0.00     37.81     0.00     1866     0.00     0.00  aalta::Solver::SAT_id_of_next(aalta::aalta_formula*)
+  0.00     37.81     0.00     1812     0.00     0.08  edgeCons::insert_ewin_Y_idx(int)
+  0.00     37.81     0.00     1594     0.00     0.00  aalta::aalta_formula::TAIL()
+  0.00     37.81     0.00     1358     0.00     0.00  aalta::Solver::build_X_map(aalta::aalta_formula*)
+  0.00     37.81     0.00     1309     0.00     0.00  aalta::olg_item::plus_pos()
+  0.00     37.81     0.00      912     0.00     0.00  aalta::aalta_formula::contain(aalta::aalta_formula::poskind, int, aalta::aalta_formula*)
+  0.00     37.81     0.00      572     0.00     0.00  aalta::olg_item::get_max_loc(int, int)
+  0.00     37.81     0.00      377     0.00     0.00  aalta::aalta_formula::init()
+  0.00     37.81     0.00      377     0.00     0.00  aalta::aalta_formula::build(_ltl_formula const*, bool, bool)
+  0.00     37.81     0.00      375     0.00     0.00  aalta::aalta_formula::aalta_formula(_ltl_formula const*, bool, bool)
+  0.00     37.81     0.00      196     0.00     0.00  std::_Hashtable<unsigned long long, unsigned long long, std::allocator<unsigned long long>, std::__detail::_Identity, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_insert_unique_node(unsigned long, unsigned long, std::__detail::_Hash_node<unsigned long long, false>*)
+  0.00     37.81     0.00      167     0.00     0.00  std::_Deque_base<std::tuple<DdNode*, aalta::aalta_formula*, bool>, std::allocator<std::tuple<DdNode*, aalta::aalta_formula*, bool> > >::~_Deque_base() [clone .lto_priv.174]
+  0.00     37.81     0.00       78     0.00     0.00  std::vector<aalta::aalta_formula*, std::allocator<aalta::aalta_formula*> >::_M_shrink_to_fit()
+  0.00     37.81     0.00       72     0.00     0.00  aalta::aalta_formula::contain(aalta::aalta_formula::poskind, int, aalta::aalta_formula::poskind, int, aalta::aalta_formula*) [clone .constprop.97]
+  0.00     37.81     0.00       72     0.00     0.00  std::_Hashtable<int, int, std::allocator<int>, std::__detail::_Identity, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::~_Hashtable()
+  0.00     37.81     0.00       42     0.00     0.00  std::pair<std::__detail::_Node_iterator<std::pair<unsigned long long const, int>, false, false>, bool> std::_Hashtable<unsigned long long, std::pair<unsigned long long const, int>, std::allocator<std::pair<unsigned long long const, int> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_emplace<std::pair<unsigned long long const, int> >(std::integral_constant<bool, true>, std::pair<unsigned long long const, int>&&) [clone .isra.318] [clone .lto_priv.179]
+  0.00     37.81     0.00       35     0.00     0.00  void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::emplace_back<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&) [clone .constprop.123]
+  0.00     37.81     0.00       29     0.00     0.00  edgeNotToFalse(aalta::aalta_formula*)
+  0.00     37.81     0.00       29     0.00     0.00  projectOneStep(aalta::aalta_formula*)
+  0.00     37.81     0.00       29     0.00     0.00  void std::__adjust_heap<__gnu_cxx::__normal_iterator<unsigned long long*, std::vector<unsigned long long, std::allocator<unsigned long long> > >, long, unsigned long long, __gnu_cxx::__ops::_Iter_less_iter>(__gnu_cxx::__normal_iterator<unsigned long long*, std::vector<unsigned long long, std::allocator<unsigned long long> > >, long, long, unsigned long long, __gnu_cxx::__ops::_Iter_less_iter) [clone .constprop.105]
+  0.00     37.81     0.00       28     0.00     0.00  std::_Hashtable<unsigned long long, std::pair<unsigned long long const, int>, std::allocator<std::pair<unsigned long long const, int> >, std::__detail::_Select1st, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, false> >::equal_range(unsigned long long const&)
+  0.00     37.81     0.00       21     0.00     0.00  std::pair<std::__detail::_Node_iterator<unsigned long long, true, false>, bool> std::_Hashtable<unsigned long long, unsigned long long, std::allocator<unsigned long long>, std::__detail::_Identity, std::equal_to<unsigned long long>, std::hash<unsigned long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_insert<unsigned long long, std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<unsigned long long, false> > > >(unsigned long long&&, std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<unsigned long long, false> > > const&, std::integral_constant<bool, true>) [clone .isra.122] [clone .lto_priv.171]
+  0.00     37.81     0.00       16     0.00     0.00  std::_Rb_tree<aalta::aalta_formula*, std::pair<aalta::aalta_formula* const, aalta::aalta_formula*>, std::_Select1st<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> >, std::less<aalta::aalta_formula*>, std::allocator<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> > >::_M_erase(std::_Rb_tree_node<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> >*)
+  0.00     37.81     0.00       11     0.00     0.00  Minisat::Solver::garbageCollect()
+  0.00     37.81     0.00       10     0.00     0.00  aalta::olg_item::proj_loc(int, int, int&)
+  0.00     37.81     0.00       10     0.00     0.00  destroy_formula.part.2
+  0.00     37.81     0.00        8     0.00     0.00  destroy_node
+  0.00     37.81     0.00        6     0.00     0.00  Minisat::DoubleOption::~DoubleOption()
+  0.00     37.81     0.00        3     0.00     0.00  Minisat::IntOption::~IntOption()
+  0.00     37.81     0.00        2     0.00     0.00  yyparse(_ltl_formula**, void*)
+  0.00     37.81     0.00        2     0.00     0.00  yy_get_previous_state(void*)
+  0.00     37.81     0.00        2     0.00     0.00  yyensure_buffer_stack(void*) [clone .lto_priv.197]
+  0.00     37.81     0.00        2     0.00     0.00  Minisat::BoolOption::~BoolOption()
+  0.00     37.81     0.00        2     0.00     0.00  std::set<int, std::less<int>, std::allocator<int> >::~set()
+  0.00     37.81     0.00        2     0.00     0.00  std::tr1::unordered_map<aalta::aalta_formula*, aalta::aalta_formula*, aalta::aalta_formula::af_prt_hash, std::equal_to<aalta::aalta_formula*>, std::allocator<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> > >::~unordered_map()
+  0.00     37.81     0.00        2     0.00     0.00  std::tr1::unordered_set<aalta::aalta_formula*, aalta::aalta_formula::af_prt_hash2, aalta::aalta_formula::af_prt_eq, std::allocator<aalta::aalta_formula*> >::~unordered_set()
+  0.00     37.81     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z5usagev.lto_priv.139
+  0.00     37.81     0.00        1     0.00     0.00  aalta::aalta_formula::aalta_formula(char const*, bool)
+  0.00     37.81     0.00        1     0.00     0.00  Minisat::vec<Minisat::Option*>::~vec()
+  0.00     37.81     0.00        1     0.00     0.00  std::map<aalta::aalta_formula*, aalta::aalta_formula*, std::less<aalta::aalta_formula*>, std::allocator<std::pair<aalta::aalta_formula* const, aalta::aalta_formula*> > >::~map()
+  0.00     37.81     0.00        1     0.00     0.00  std::set<aalta::olg_item*, std::less<aalta::olg_item*>, std::allocator<aalta::olg_item*> >::~set()
+  0.00     37.81     0.00        1     0.00     0.00  std::tr1::unordered_map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, int, std::tr1::hash<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::equal_to<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::~unordered_map()
+  0.00     37.81     0.00        1     0.00     0.00  std::tr1::unordered_map<int, int, std::tr1::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, int> > >::~unordered_map()
+  0.00     37.81     0.00        1     0.00     0.00  std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~vector()
+  0.00     37.81     0.00        1     0.00     0.00  std::vector<aalta::olg_atom*, std::allocator<aalta::olg_atom*> >::~vector()
+  0.00     37.81     0.00        1     0.00     0.00  std::vector<std::pair<aalta::aalta_formula*, aalta::aalta_formula*>, std::allocator<std::pair<aalta::aalta_formula*, aalta::aalta_formula*> > >::~vector()
+  0.00     37.81     0.00        1     0.00     0.00  std::vector<int, std::allocator<int> >::~vector()
+  0.00     37.81     0.00        1     0.00     0.00  main
