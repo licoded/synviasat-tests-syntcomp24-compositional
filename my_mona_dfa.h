@@ -69,7 +69,7 @@ struct MyMonaDFA{
         bool continue_flag = true;
         while(continue_flag)
         {
-            string &curline_pre = line_pres[line_num++];    // start from 1
+            string &curline_pre = line_pres[++line_num];    // start from 1
             getline(inFile, s);
             assert(s.substr(0, curline_pre.size()) == curline_pre);
             s = s.substr(curline_pre.size());

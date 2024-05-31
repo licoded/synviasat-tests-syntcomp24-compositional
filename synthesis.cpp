@@ -199,7 +199,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
             {
                 vertex_XCons->insert({afX_bddP, new vector<MyYCons>()});
             }
-            vertex_XCons->at(afY_bddP)->push_back({afY_bddP, successor});
+            vertex_XCons->at(afX_bddP)->push_back({afY_bddP, successor});
         }
         edge_cons_map.insert({vertex, vertex_XCons});
     }
@@ -745,7 +745,7 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
         vector<MonaDFA_Edge> cur_succ_edges;
         /* non-recursive DFS getEdge */
         stack<pair<int, aalta_formula *>> state_search_sta;
-        state_search_sta.push({i, NULL});   // cur_bdd_id, pre_formula
+        state_search_sta.push({i, aalta_formula::TRUE()});   // cur_bdd_id, pre_formula
         while(!state_search_sta.empty())
         {
             auto top_item = state_search_sta.top();
@@ -754,8 +754,6 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
             if (isEnd(cur_bdd))
             {
                 int succ_state_id = cur_bdd[1];
-                if (top_item.second == NULL)
-                    top_item.second = aalta_formula::TRUE();
                 // graph.add_edge(i, cur_bdd[1], top_item.second);
                 cur_succ_edges.push_back({succ_state_id, top_item.second});
             }
@@ -763,7 +761,7 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
             {
                 int x = cur_bdd[0], l = cur_bdd[1], r = cur_bdd[2];
                 aalta_formula *cur_var = aalta_formula(x+12, NULL, NULL).unique();   // TODO: ensure 12!!!
-                aalta_formula *not_cur = aalta_formula(aalta_formula::Not, cur_var, NULL).unique();
+                aalta_formula *not_cur = aalta_formula(aalta_formula::Not, NULL, cur_var).unique();
                 state_search_sta.push({l, aalta_formula(aalta_formula::And, top_item.second, not_cur).unique()});
                 state_search_sta.push({r, aalta_formula(aalta_formula::And, top_item.second, cur_var).unique()});
             }
@@ -785,7 +783,7 @@ void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair)
     {
         aalta_formula *cur_var = aalta_formula(abs(var_id), NULL, NULL).unique();
         if (var_id < 0)
-            cur_var = aalta_formula(aalta_formula::Not, cur_var, NULL).unique();
+            cur_var = aalta_formula(aalta_formula::Not, NULL, cur_var).unique();
         if (Syn_Frame::var_X.find(var_id) != Syn_Frame::var_X.end())
         {
             if (afX == aalta_formula::TRUE())
