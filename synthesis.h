@@ -10,7 +10,6 @@
 #include "formula_in_bdd.h"
 #include "syn_type.h"
 #include "graph.h"
-#include "my_mona_dfa.h"
 #include "deps/CUDD-install/include/cudd.h"
 
 using namespace std;
@@ -105,7 +104,6 @@ void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
 void printGraph(Syn_Graph &graph);
 shared_ptr<char> af2binaryString(aalta_formula *af);
 
-void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
 void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair);
 
 // for tarjan

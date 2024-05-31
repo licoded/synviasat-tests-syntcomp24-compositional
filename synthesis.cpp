@@ -13,6 +13,7 @@ extern "C" {
 
 #include "formula_in_bdd.h"
 #include "preprocessAcc.h"
+#include "my_mona_dfa.h"
 
 using namespace std;
 using namespace aalta;
@@ -36,6 +37,7 @@ unordered_map<ull, int> dfn;
 unordered_map<ull, int> low;
 int dfs_time;
 
+void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
 void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
 shared_ptr<char> string2char_ptr(const string &s)
