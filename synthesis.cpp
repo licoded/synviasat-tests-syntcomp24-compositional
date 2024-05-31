@@ -236,21 +236,21 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
                        inserter(candidate_new_swin, candidate_new_swin.begin()));
         for (auto s : candidate_new_swin)
         {
-            bool cur_s_isSwin = false;
+            bool cur_s_isSwin = true;
             for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
             {
-                bool cur_afX_toSwin = true;
+                bool cur_afX_toSwin = false;
                 for (auto myYCons : *(afX_myYCons_vec_pair.second))
                 {
-                    if (swin.find(myYCons.second) == swin.end())
+                    if (swin.find(myYCons.second) != swin.end())
                     {
-                        cur_afX_toSwin = false;
+                        cur_afX_toSwin = true;
                         break;
                     }
                 }
-                if (cur_afX_toSwin)
+                if (!cur_afX_toSwin)
                 {
-                    cur_s_isSwin = true;
+                    cur_s_isSwin = false;
                     break;
                 }
             }
