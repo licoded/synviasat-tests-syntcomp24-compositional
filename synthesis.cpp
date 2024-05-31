@@ -119,6 +119,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         indicies[i] = i;
     }
 
+    system("mkdir -p examples/temp-drafts");
     // get whole DFA
     DFA *dfa = dfaTrue();
     for (auto it : and_sub_afs)
@@ -136,25 +137,21 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         string af_s = it->to_string();
         // delete all spaces from af_s
         af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
-        string dfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dfa";
-        string dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/" + af_s + ".dot";
+        string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
+        string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
 
-        printDFA(dfa_cur, dot_filename, var_num, var_index);
-        // dfaExport(dfa_cur, string2char_ptr(dfa_filename).get(), var_num, var_names, orders.get());
-        // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+dfa_filename+"\" \""+dot_filename+"\"").c_str());
+        // printDFA(dfa_cur, dot_filename, var_num, var_index);
 
-        // TODO: dfa_cur = minize(dfa_cur);
         dfa = dfaProduct(dfa, dfa_cur, dfaAND);
         dfa = dfaMinimize(dfa);
-        // delete init; // NOTE: WholeDFA --> init belongs to some scc --> has been deleted in forwardSearch_wholeDFA ???
     }
 
-    string wholedfa_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole.dfa";
-    string wholedfa2dot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole_dfa2.dot";
-    string wholedot_filename = "/home/lic/shengpingxiao/compositional-synthesis-codes/ltlfsyn_synthesis_envfirst_0501/examples/temp-drafts/whole.dot";
-    printDFA(dfa, wholedot_filename, var_num, var_index);
+    string wholedfa_filename = "examples/temp-drafts/whole.dfa";
+    // string wholedfa2dot_filename = "examples/temp-drafts/whole_dfa2.dot";
+    // string wholedot_filename = "examples/temp-drafts/whole.dot";
+    // printDFA(dfa, wholedot_filename, var_num, var_index);
     dfaExport(dfa, string2char_ptr(wholedfa_filename).get(), var_num, var_names, orders.get());
-    system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
+    // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
 
     // TODO: delete char** and char*
     return dfa_backward_check(wholedfa_filename);
