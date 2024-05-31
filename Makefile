@@ -17,7 +17,7 @@ HOME_ROOT		=		/home/lic/syntcomp2024/install_root/usr/local
 INCLUDE_ROOT	=		${HOME_ROOT}/include
 LIBRARY_ROOT	=		${HOME_ROOT}/lib
 
-MONA_LIBS		=		${LIBRARY_ROOT}/libmonadfa.so
+MONA_LIBS		=		${LIBRARY_ROOT}/libmonadfa.a ${LIBRARY_ROOT}/libmonamem.a ${LIBRARY_ROOT}/libmonabdd.a
 
 ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTILFILES) $(SYNTHESIS) $(BDD_LIB) ${MONA_LIBS}
 
@@ -25,7 +25,7 @@ ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTIL
 CC	    =   g++ -std=c++11
 FLAG    = -I./  -I./minisat/ -I${INCLUDE_ROOT} -isystem./minisat  -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -w #-fpermissive 
 DEBUGFLAG   =	-D DEBUG -Wall -g #-pg -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
-RELEASEFLAG = -O3 -static -flto -funroll-loops -fprofile-use #-pg 
+RELEASEFLAG = -O3 -static -flto -funroll-loops -fprofile-use #-pg
 
 ltlfsyn :	release
 
