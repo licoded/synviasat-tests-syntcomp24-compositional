@@ -205,10 +205,13 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     }
 
     set<int> cur_swin, new_swin, swin;
-    for (auto vertex : my_dfa.final)
+    for (int i = 0; i < my_dfa.states_num; i++)
     {
-        cur_swin.insert(vertex);
-        swin.insert(vertex);
+        if (my_dfa.final[i] == 1)
+        {
+            cur_swin.insert(i);
+            swin.insert(i);
+        }
     }
     bool is_realizable = false;
     do {
@@ -745,7 +748,7 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
         vector<MonaDFA_Edge> cur_succ_edges;
         /* non-recursive DFS getEdge */
         stack<pair<int, aalta_formula *>> state_search_sta;
-        state_search_sta.push({i, aalta_formula::TRUE()});   // cur_bdd_id, pre_formula
+        state_search_sta.push({dfa.behaviour[i], aalta_formula::TRUE()});   // cur_bdd_id, pre_formula
         while(!state_search_sta.empty())
         {
             auto top_item = state_search_sta.top();
