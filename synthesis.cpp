@@ -127,8 +127,8 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         Syn_Frame *init = new Syn_Frame(it);
         DdNode *init_bddP = init->GetBddPointer();
         forwardSearch_wholeDFA(init, graph);
-        cout << "sub_af:\t" << it->to_string() << endl;
-        printGraph(graph); // for DEBUG
+        // cout << "sub_af:\t" << it->to_string() << endl;
+        // printGraph(graph); // for DEBUG
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
         dfa_cur = dfaMinimize(dfa_cur);
@@ -446,7 +446,7 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
                 vector<Syn_Frame *> scc;
                 getScc(dfs_cur, scc, tarjan_sta, sta_bdd2curIdx_map);
                 backwardSearch(scc);
-                cout << "++ scc.size: " << scc.size() << endl;
+                // cout << "++ scc.size: " << scc.size() << endl;
                 addSccToGraph(scc, graph);
                 for (auto it : scc)
                     delete it;
@@ -480,10 +480,10 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
         unordered_set<int> edge_var_set;
         bool exist_edge_to_explorer = dfs_sta[dfs_cur]->getEdge(edge_var_set, model);
 
-        cout << "edge:\t";
-        for (auto it : edge_var_set)
-            cout << aalta_formula::get_name(it) << ", ";
-        cout << endl;
+        // cout << "edge:\t";
+        // for (auto it : edge_var_set)
+        //     cout << aalta_formula::get_name(it) << ", ";
+        // cout << endl;
 
         if (!exist_edge_to_explorer)
             continue;
@@ -634,7 +634,7 @@ void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
         syn_frame_ptr->get_succ_edges(succ_edges);
         for (auto syn_edge : succ_edges)
         {
-            cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
+            // cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
             if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
                 continue;
             graph.add_edge(syn_frame_ptr->GetBddPointer(), syn_edge.first, syn_edge.second);
@@ -726,7 +726,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     assert(bddP_to_stateid.size() > 2);
     string state_type_s = bddP_to_stateid.size() > 3 ? string(bddP_to_stateid.size()-3, '0') : "";
     state_type_s = "0+-" + state_type_s;
-    cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
+    // cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
     return dfaBuild(string2char_ptr(state_type_s).get());
 }
 
