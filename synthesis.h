@@ -106,6 +106,7 @@ void printGraph(Syn_Graph &graph);
 shared_ptr<char> af2binaryString(aalta_formula *af);
 
 void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
+void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);

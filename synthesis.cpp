@@ -155,10 +155,111 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
     MyMonaDFA my_dfa;
     my_dfa.readMyMonaDFA(wholedfa_filename);
+    MonaDFA_Graph mona_graph;
+    monaDFA2graph(mona_graph, my_dfa);
+
+    using MyYCons = pair<ull, int>;
+    using MyXCons = unordered_map<ull, vector<MyYCons>*>;
+    using MyEdgeCons = unordered_map<int, MyXCons *>;
+    MyEdgeCons edge_cons_map;
+    unordered_map<int, set<int>*> predecessors_map;
+
+    for (auto vertex : mona_graph.vertices)
+    {
+        if (mona_graph.edges.find(vertex) == mona_graph.edges.end())
+        {
+            edge_cons_map.insert({vertex, NULL});
+            continue;
+        }
+        auto vertex_edges = mona_graph.edges[vertex];
+        MyXCons *vertex_XCons = new MyXCons();
+        for (auto edge : vertex_edges)
+        {
+            auto edge_af = edge.label;
+            auto successor = edge.dest;
+            if (predecessors_map.find(successor) == predecessors_map.end())
+            {
+                predecessors_map.insert({successor, new set<int>()});
+            }
+            predecessors_map[successor]->insert(vertex);
+            /* TODO: split afX and afY from edge_af */
+            vector<aalta_formula *> af_XY_pair;
+            split_afXY(edge_af, af_XY_pair);
+            assert(af_XY_pair.size() == 2);
+            aalta_formula *afX = af_XY_pair[0];
+            aalta_formula *afY = af_XY_pair[1];
+            /* TODO: collect ptrs and clean them in the end of func */
+            FormulaInBdd *afX_in_bdd = new FormulaInBdd(afX);
+            FormulaInBdd *afY_in_bdd = new FormulaInBdd(afY);
+            ull afX_bddP = ull(afX_in_bdd->GetBddPointer());
+            ull afY_bddP = ull(afY_in_bdd->GetBddPointer());
+            if (vertex_XCons->find(afX_bddP) == vertex_XCons->end())
+            {
+                vertex_XCons->insert({afX_bddP, new vector<MyYCons>()});
+            }
+            vertex_XCons->at(afY_bddP)->push_back({afY_bddP, successor});
+        }
+        edge_cons_map.insert({vertex, vertex_XCons});
+    }
+
+    set<int> cur_swin, new_swin, swin;
+    for (auto vertex : my_dfa.final)
+    {
+        cur_swin.insert(vertex);
+        swin.insert(vertex);
+    }
+    bool is_realizable = false;
+    do {
+        if (swin.find(my_dfa.initial_stateid) != swin.end())
+        {
+            is_realizable = true;
+            break;
+        }
+
+        new_swin.clear();
+        set<int> candidate_new_swin_pre;
+        for (auto it : cur_swin)
+        {
+            set<int> *pred = predecessors_map[it];
+            set_union(candidate_new_swin_pre.begin(), candidate_new_swin_pre.end(),
+                      pred->begin(), pred->end(),
+                      inserter(candidate_new_swin_pre, candidate_new_swin_pre.begin()));
+        }
+        set<int> candidate_new_swin;
+        set_difference(candidate_new_swin_pre.begin(), candidate_new_swin_pre.end(),
+                       swin.begin(), swin.end(),
+                       inserter(candidate_new_swin, candidate_new_swin.begin()));
+        for (auto s : candidate_new_swin)
+        {
+            bool cur_s_isSwin = false;
+            for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
+            {
+                bool cur_afX_toSwin = true;
+                for (auto myYCons : *(afX_myYCons_vec_pair.second))
+                {
+                    if (swin.find(myYCons.second) == swin.end())
+                    {
+                        cur_afX_toSwin = false;
+                        break;
+                    }
+                }
+                if (cur_afX_toSwin)
+                {
+                    cur_s_isSwin = true;
+                    break;
+                }
+            }
+            if (cur_s_isSwin)
+            {
+                new_swin.insert(s);
+                swin.insert(s);
+            }
+        }
+        cur_swin = new_swin;
+    } while (!new_swin.empty());
 
     // TODO: delete char** and char*
-
-    return true;
+    return is_realizable;
 }
 
 bool forwardSearch(Syn_Frame *init_frame)
@@ -670,6 +771,37 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
         for (auto edge : cur_succ_edges)
             graph.add_edge(i, edge.first, edge.second);
     }
+}
+
+void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair)
+{
+    unordered_set<int> edge_set;
+    edge->to_set(edge_set);
+    aalta_formula *afX = aalta_formula::TRUE();
+    aalta_formula *afY = aalta_formula::TRUE();
+    for (auto var_id : edge_set)
+    {
+        aalta_formula *cur_var = aalta_formula(abs(var_id), NULL, NULL).unique();
+        if (var_id < 0)
+            cur_var = aalta_formula(aalta_formula::Not, cur_var, NULL).unique();
+        if (Syn_Frame::var_X.find(var_id) != Syn_Frame::var_X.end())
+        {
+            if (afX == aalta_formula::TRUE())
+                afX = cur_var;
+            else
+                afX = aalta_formula(aalta_formula::And, afX, cur_var).unique();
+        }
+        else
+        {
+            if (afY == aalta_formula::TRUE())
+                afY = cur_var;
+            else
+                afY = aalta_formula(aalta_formula::And, afY, cur_var).unique();
+        }
+    }
+    af_XY_pair.clear();
+    af_XY_pair.push_back(afX);
+    af_XY_pair.push_back(afY);
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)
