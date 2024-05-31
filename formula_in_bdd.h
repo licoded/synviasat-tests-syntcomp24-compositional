@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <iostream>
+#include <set>
 
 #include "formula/aalta_formula.h"
 #include "formula/af_utils.h"
@@ -16,26 +17,27 @@ typedef unsigned long long ull;
 class FormulaInBdd
 {
 private:
-    static DdManager *global_bdd_manager_;
     static unordered_map<ull, ull> aaltaP_to_bddP_;
     static unordered_map<int, ull> bddIdx_to_aaltaP_;
+    // static unordered_map<ull,DdNode*> temporal_afp_to_bddP_;
     static aalta_formula *src_formula_;
 
     static unordered_set<ull> aaltaP_map_created;
 
     static void CreatedMap4AaltaP2BddP(aalta_formula *af);
+    // static DdNode *getXnfBdd(aalta_formula *af);
+    static DdNode *buildXnfBdd(aalta_formula *af);
 
     aalta_formula *formula_;
-    aalta_formula *xnf_formula_;
+    // aalta_formula *xnf_formula_;
     DdNode *bdd_;
 
-    static DdNode *ConstructBdd(aalta_formula *af);
-
 public:
-    static unsigned int X_var_nums, Y_var_nums;
-    static bool is_Y_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= X_var_nums && Cudd_NodeReadIndex(node) < Y_var_nums + X_var_nums; }
-    static bool is_X_var(DdNode *node) { return Cudd_NodeReadIndex(node) < X_var_nums; }
-    static bool is_notXY_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= Y_var_nums + X_var_nums; }
+    static unsigned int X_var_nums, Y_var_nums, total_var_nums;
+    static DdManager *global_bdd_manager_;
+    static bool is_X_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= Y_var_nums && Cudd_NodeReadIndex(node) < total_var_nums; }
+    static bool is_Y_var(DdNode *node) { return Cudd_NodeReadIndex(node) < Y_var_nums; }
+    static bool is_notXY_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= total_var_nums; }
     static bool is_Next_var(DdNode *node) { return is_notXY_var(node) && !Cudd_IsConstant(node); }
     static aalta_formula *get_af_var(int node_idx) { return (aalta_formula *)bddIdx_to_aaltaP_[node_idx]; }
 
@@ -46,7 +48,9 @@ public:
 
     static void InitBdd4LTLf(aalta_formula *src_formula, std::set<int> &X_vars, std::set<int> &Y_vars);
     static void QuitBdd4LTLf() { Cudd_Quit(global_bdd_manager_); }
-    static void fixXYOrder(std::set<int> &X_vars, std::set<int> &Y_vars);
+    static void fixXYOrder(set<int> &X_vars, set<int> &Y_vars);
+
+    static DdNode *ConstructBdd(aalta_formula *af);
 
     FormulaInBdd(aalta_formula *af);
 

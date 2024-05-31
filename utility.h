@@ -15,6 +15,8 @@
  {
  	aalta_formula* formula_from (std::vector<aalta_formula*>& ands);
 	void print_vec (const std::vector<int>&);
+
+	aalta_formula* formula_from_or (std::vector<aalta_formula*>& ors);
  }
  
  #endif

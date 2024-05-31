@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "formula_in_bdd.h"
-#include "preprocessAcc.h"
+#include "preprocess.h"
 
 using namespace std;
 using namespace aalta;

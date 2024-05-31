@@ -16,14 +16,10 @@
  {
  	if (ands.empty ())
  		return aalta_formula::TRUE ();
- 	aalta_formula *res = NULL;
- 	for (std::vector<aalta_formula*>::iterator it = ands.begin (); it != ands.end (); it ++)
- 	{
- 		if (res == NULL)
- 			res = *it;
- 		else
- 			res = aalta_formula (aalta_formula::And, res, *it).unique ();
- 	}
+	std::vector<aalta_formula*>::iterator it = ands.begin ();
+	aalta_formula *res = (*it);
+ 	for (++it; it != ands.end (); ++ it)
+ 		res = aalta_formula (aalta_formula::And, res, *it).unique ();
  	return res;
  }
  
@@ -35,5 +31,16 @@
 	 cout << ")";
  }
  
+ aalta_formula* formula_from_or (std::vector<aalta_formula*>& ors)
+ {
+ 	if (ors.empty ())
+ 		return aalta_formula::FALSE ();
+	std::vector<aalta_formula*>::iterator it = ors.begin ();
+	aalta_formula *res = (*it);
+ 	for (++it; it != ors.end (); ++ it)
+ 		res = aalta_formula (aalta_formula::Or, res, *it).unique ();
+ 	return res;
+ }
+
  }
  
