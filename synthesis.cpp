@@ -12,7 +12,7 @@ extern "C" {
 }
 
 #include "formula_in_bdd.h"
-#include "preprocessAcc.h"
+#include "preprocess.h"
 #include "my_mona_dfa.h"
 
 using namespace std;
