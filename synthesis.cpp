@@ -40,7 +40,7 @@ int dfs_time;
 void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
 bool dfa_backward_check(string &dfa_filename);
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
-void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
+void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
 char *string2char_ptr(const string &s)
 {
     char *ptr = new char[s.size() + 1];
@@ -638,7 +638,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     return dfa;
 }
 
-void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index)
+void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index)
 {
     FILE* original_stdout = stdout;
     stdout = fopen(dot_filename.c_str(), "w");
