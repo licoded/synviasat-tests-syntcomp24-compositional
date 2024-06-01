@@ -2,6 +2,7 @@
 #define __SYNTHESIS__
 
 #include <cassert>
+#include <cstring>
 #include <unordered_set>
 #include <set>
 
@@ -9,6 +10,7 @@
 #include "edge_cons.h"
 #include "formula_in_bdd.h"
 #include "syn_type.h"
+#include "graph.h"
 #include "deps/CUDD-install/include/cudd.h"
 
 using namespace std;
@@ -17,6 +19,10 @@ using namespace aalta;
 extern bool SAT_TRACE_FLAG;
 
 typedef unsigned long long ull;
+using Syn_Edge = pair<DdNode *, aalta_formula *>;
+using Syn_Graph = MyGraph<DdNode *, aalta_formula *>;
+using MonaDFA_Edge = pair<int, aalta_formula *>;
+using MonaDFA_Graph = MyGraph<int, aalta_formula *>;
 
 // main entry
 bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, bool verbose);
@@ -60,8 +66,12 @@ public:
     Status checkStatus();
     void processSignal(Signal sig, DdNode *succ);
 
+    bool hasTravAllEdges();
+
     bool getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model);
     Status get_status() { return status_; }
+
+    void get_succ_edges(vector<Syn_Edge> &succ_edges);
 
     bool checkSwinForBackwardSearch();
 
@@ -88,6 +98,13 @@ public:
 
 bool forwardSearch(Syn_Frame *);
 void backwardSearch(std::vector<Syn_Frame *> &scc);
+
+bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
+void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
+void printGraph(Syn_Graph &graph);
+shared_ptr<char> af2binaryString(aalta_formula *af);
+
+void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair);
 
 // for tarjan
 void initial_tarjan_frame(Syn_Frame *cur_frame);
