@@ -537,8 +537,9 @@ void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
         for (auto syn_edge : succ_edges)
         {
             // cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
-            if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
-                continue;
+            /* NOTE: self-loop in sub_af cannot be deleted, as they may not self-loop in whole_af */
+            // if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
+            //     continue;
             graph.add_edge(syn_frame_ptr->GetBddPointer(), syn_edge.first, syn_edge.second);
         }
     }
@@ -679,7 +680,11 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
         /* add to Graph */
         graph.add_vertex(i);
         for (auto edge : cur_succ_edges)
+        {
+            if (i == edge.first)
+                continue;
             graph.add_edge(i, edge.first, edge.second);
+        }
     }
 }
 
@@ -799,6 +804,8 @@ bool dfa_backward_check(string &dfa_filename)
                        inserter(candidate_new_swin, candidate_new_swin.begin()));
         for (auto s : candidate_new_swin)
         {
+            if (edge_cons_map[s] == NULL)
+                continue;
             bool cur_s_isSwin = true;
             for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
             {
@@ -828,6 +835,8 @@ bool dfa_backward_check(string &dfa_filename)
 
     for (auto edge_cons_item : edge_cons_map)
     {
+        if (edge_cons_item.second == NULL)
+            continue;
         for (auto my_xcons_item : *(edge_cons_item.second))
         {
             delete my_xcons_item.second;
