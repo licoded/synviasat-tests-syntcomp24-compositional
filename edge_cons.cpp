@@ -255,7 +255,7 @@ void YCons::processSignal(Signal sig, DdNode *succ)
         else if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
             status_ = Dfs_complete;
     }
-    if (sig == To_swin)
+    else if (sig == To_swin)
     {
         status_ = Swin;
         if (WholeDFA_FLAG)
