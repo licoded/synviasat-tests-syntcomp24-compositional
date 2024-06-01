@@ -40,15 +40,15 @@ int dfs_time;
 void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
 bool dfa_backward_check(string &dfa_filename);
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
-void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
-shared_ptr<char> string2char_ptr(const string &s)
+void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
+char *string2char_ptr(const string &s)
 {
-    shared_ptr<char> ptr(new char[s.size() + 1]);
-    strcpy(ptr.get(), s.c_str());
-    ptr.get()[s.size()] = '\0';
+    char *ptr = new char[s.size() + 1];
+    strcpy(ptr, s.c_str());
+    ptr[s.size()] = '\0';
     return ptr;
 }
-shared_ptr<char> af2binaryString(aalta_formula *af)
+char *af2binaryString(aalta_formula *af)
 {
     // -11 -1(TAIL)
     unordered_set<int> edgeset;
@@ -134,16 +134,18 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         // printGraph(graph); // for DEBUG
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
-        dfa_cur = dfaMinimize(dfa_cur);
+        DFA *dfa_cur_min = dfaMinimize(dfa_cur);
+        free(dfa_cur);
         string af_s = it->to_string();
         // delete all spaces from af_s
         af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
         string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
         string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
 
-        // printDFA(dfa_cur, dot_filename, var_num, var_index);
+        // printDFA(dfa_cur_min, dot_filename, var_num, var_index);
 
-        dfa = dfaProduct(dfa, dfa_cur, dfaAND);
+        dfa = dfaProduct(dfa, dfa_cur_min, dfaAND);
+        free(dfa_cur_min);
         dfa = dfaMinimize(dfa);
     }
 
@@ -151,10 +153,20 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     // string wholedfa2dot_filename = "examples/temp-drafts/whole_dfa2.dot";
     // string wholedot_filename = "examples/temp-drafts/whole.dot";
     // printDFA(dfa, wholedot_filename, var_num, var_index);
-    dfaExport(dfa, string2char_ptr(wholedfa_filename).get(), var_num, var_names, orders.get());
+    char *wholedfa_filename_char_ptr = string2char_ptr(wholedfa_filename);
+    dfaExport(dfa, wholedfa_filename_char_ptr, var_num, var_names, orders);
+    delete[] wholedfa_filename_char_ptr;
     // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
 
     // TODO: delete char** and char*
+    free(dfa);
+    delete[] var_index;
+    delete[] orders;
+    delete[] indicies;
+    for (int i = 0; i < var_num; i++)
+        delete[] var_names[i];
+    delete[] var_names;
+
     return dfa_backward_check(wholedfa_filename);
 }
 
@@ -534,8 +546,9 @@ void addSccToGraph(vector<Syn_Frame *> &scc, Syn_Graph &graph)
         for (auto syn_edge : succ_edges)
         {
             // cout << "||\t" << ull(syn_frame_ptr->GetBddPointer()) << " -> " << ull(syn_edge.first) << "\tby\t" << syn_edge.second->to_string() << endl;
-            if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
-                continue;
+             /* NOTE: self-loop in sub_af cannot be deleted, as they may not self-loop in whole_af */
+            // if (ull(syn_frame_ptr->GetBddPointer()) == ull(syn_edge.first))
+            //     continue;
             graph.add_edge(syn_frame_ptr->GetBddPointer(), syn_edge.first, syn_edge.second);
         }
     }
@@ -592,7 +605,8 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
             auto bin_edge_ptr = af2binaryString(edge.label);
-            dfaStoreException(dest_stateid, bin_edge_ptr.get());
+            dfaStoreException(dest_stateid, bin_edge_ptr);
+            delete[] bin_edge_ptr;
         }
         dfaStoreState(false_stateid);
         graph.edges.erase(init_bddP);
@@ -617,7 +631,8 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
             auto bin_edge_ptr = af2binaryString(edge.label);
-            dfaStoreException(dest_stateid, bin_edge_ptr.get());
+            dfaStoreException(dest_stateid, bin_edge_ptr);
+            delete[] bin_edge_ptr;
         }
         dfaStoreState(false_stateid);   // NOTE: I think there are no default transitions!!!
     }
@@ -626,10 +641,13 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     string state_type_s = bddP_to_stateid.size() > 3 ? string(bddP_to_stateid.size()-3, '0') : "";
     state_type_s = "0+-" + state_type_s;
     // cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
-    return dfaBuild(string2char_ptr(state_type_s).get());
+    auto state_type_char_ptr = string2char_ptr(state_type_s);
+    DFA *dfa = dfaBuild(state_type_char_ptr);
+    delete[] state_type_char_ptr;
+    return dfa;
 }
 
-void *printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index)
+void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index)
 {
     FILE* original_stdout = stdout;
     stdout = fopen(dot_filename.c_str(), "w");
@@ -671,7 +689,11 @@ void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
         /* add to Graph */
         graph.add_vertex(i);
         for (auto edge : cur_succ_edges)
+        {
+            if (i == edge.first)
+                continue;
             graph.add_edge(i, edge.first, edge.second);
+        }
     }
 }
 
@@ -748,6 +770,8 @@ bool dfa_backward_check(string &dfa_filename)
             FormulaInBdd *afY_in_bdd = new FormulaInBdd(afY);
             ull afX_bddP = ull(afX_in_bdd->GetBddPointer());
             ull afY_bddP = ull(afY_in_bdd->GetBddPointer());
+            delete afX_in_bdd;
+            delete afY_in_bdd;
             if (vertex_XCons->find(afX_bddP) == vertex_XCons->end())
             {
                 vertex_XCons->insert({afX_bddP, new vector<MyYCons>()});
@@ -789,6 +813,8 @@ bool dfa_backward_check(string &dfa_filename)
                        inserter(candidate_new_swin, candidate_new_swin.begin()));
         for (auto s : candidate_new_swin)
         {
+            if (edge_cons_map[s] == NULL)
+                continue;
             bool cur_s_isSwin = true;
             for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
             {
@@ -815,6 +841,21 @@ bool dfa_backward_check(string &dfa_filename)
         }
         cur_swin = new_swin;
     } while (!new_swin.empty());
+
+    for (auto edge_cons_item : edge_cons_map)
+    {
+        if (edge_cons_item.second == NULL)
+            continue;
+        for (auto my_xcons_item : *(edge_cons_item.second))
+        {
+            delete my_xcons_item.second;
+        }
+        delete edge_cons_item.second;
+    }
+    // unordered_map<int, set<int>*> predecessors_map;
+    for (auto prodecessors_item : predecessors_map)
+        delete prodecessors_item.second;
+    
     return is_realizable;
 }
 
