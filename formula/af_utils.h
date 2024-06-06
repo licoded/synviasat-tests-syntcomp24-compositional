@@ -20,5 +20,7 @@ void to_conjunts(aalta_formula *af, set<aalta_formula *> &conjuncts);
 void to_disjunts(aalta_formula *af, set<aalta_formula *> &disjunts);
 
 // void fill_in_Y_edgeset(std::unordered_set<int> &partial_edgeset);
+void fill_in_X_edgeset(std::unordered_set<int> &partial_edgeset);
+aalta_formula *eliminateY(aalta_formula *af, const unordered_set<int> &Y);
 
 #endif

@@ -287,68 +287,79 @@ void to_disjunts(aalta_formula *af, set<aalta_formula *> &disjunts)
 //     }
 // }
 
-// aalta_formula *eliminateY(aalta_formula *af, const unordered_set<int> &Y)
-// {
-//     if (af == NULL)
-//         return NULL;
-//     auto op = af->oper();
-//     if (op >= 11)
-//     {
-//         if (Syn_Frame::var_X.find(op) != Syn_Frame::var_X.end()) // x-variable
-//             return af;
-//         if (Y.find(-op) != Y.end())
-//             return aalta_formula::FALSE();
-//         else // two cases: op in Y, or op not in Y
-//             return aalta_formula::TRUE();
-//     }
-//     else if (op == aalta_formula::Not)
-//     {
-//         auto rop = (af->r_af())->oper();
-//         if (Syn_Frame::var_X.find(rop) != Syn_Frame::var_X.end()) // x-variable
-//             return af;
-//         if (Y.find(-rop) != Y.end())
-//             return aalta_formula::TRUE();
-//         else // two cases: rop in Y, or rop not in Y
-//             return aalta_formula::FALSE();
-//     }
-//     switch (op)
-//     {
-//     case aalta_formula::True:
-//     case aalta_formula::False:
-//     case aalta_formula::Next:
-//     case aalta_formula::WNext:
-//     case aalta_formula::Until:
-//     case aalta_formula::Release:
-//         return af;
-//     case aalta_formula::And:
-//     {
-//         aalta_formula *p_l = eliminateY(af->l_af(), Y);
-//         if (p_l == aalta_formula::FALSE())
-//             return aalta_formula::FALSE();
-//         aalta_formula *p_r = eliminateY(af->r_af(), Y);
-//         if (p_r == aalta_formula::FALSE())
-//             return aalta_formula::FALSE();
-//         if (p_l == aalta_formula::TRUE())
-//             return p_r;
-//         if (p_r == aalta_formula::TRUE())
-//             return p_l;
-//         return aalta_formula(aalta_formula::And, p_l, p_r).unique();
-//     }
-//     case aalta_formula::Or:
-//     {
-//         aalta_formula *p_l = eliminateY(af->l_af(), Y);
-//         if (p_l == aalta_formula::TRUE())
-//             return aalta_formula::TRUE();
-//         aalta_formula *p_r = eliminateY(af->r_af(), Y);
-//         if (p_r == aalta_formula::TRUE())
-//             return aalta_formula::TRUE();
-//         if (p_l == aalta_formula::FALSE())
-//             return p_r;
-//         if (p_r == aalta_formula::FALSE())
-//             return p_l;
-//         return aalta_formula(aalta_formula::Or, p_l, p_r).unique();
-//     }
-//     default:
-//         assert(false);
-//     }
-// }
+void fill_in_X_edgeset(std::unordered_set<int> &partial_edgeset)
+{
+    for (auto it : Syn_Frame::var_X)
+    {
+        if (partial_edgeset.find(it) == partial_edgeset.end() && partial_edgeset.find(-(it)) == partial_edgeset.end())
+        {
+            partial_edgeset.insert(it);
+        }
+    }
+}
+
+aalta_formula *eliminateY(aalta_formula *af, const unordered_set<int> &Y)
+{
+    if (af == NULL)
+        return NULL;
+    auto op = af->oper();
+    if (op >= 11)
+    {
+        if (Syn_Frame::var_X.find(op) != Syn_Frame::var_X.end()) // x-variable
+            return af;
+        if (Y.find(-op) != Y.end())
+            return aalta_formula::FALSE();
+        else // two cases: op in Y, or op not in Y
+            return aalta_formula::TRUE();
+    }
+    else if (op == aalta_formula::Not)
+    {
+        auto rop = (af->r_af())->oper();
+        if (Syn_Frame::var_X.find(rop) != Syn_Frame::var_X.end()) // x-variable
+            return af;
+        if (Y.find(-rop) != Y.end())
+            return aalta_formula::TRUE();
+        else // two cases: rop in Y, or rop not in Y
+            return aalta_formula::FALSE();
+    }
+    switch (op)
+    {
+    case aalta_formula::True:
+    case aalta_formula::False:
+    case aalta_formula::Next:
+    case aalta_formula::WNext:
+    case aalta_formula::Until:
+    case aalta_formula::Release:
+        return af;
+    case aalta_formula::And:
+    {
+        aalta_formula *p_l = eliminateY(af->l_af(), Y);
+        if (p_l == aalta_formula::FALSE())
+            return aalta_formula::FALSE();
+        aalta_formula *p_r = eliminateY(af->r_af(), Y);
+        if (p_r == aalta_formula::FALSE())
+            return aalta_formula::FALSE();
+        if (p_l == aalta_formula::TRUE())
+            return p_r;
+        if (p_r == aalta_formula::TRUE())
+            return p_l;
+        return aalta_formula(aalta_formula::And, p_l, p_r).unique();
+    }
+    case aalta_formula::Or:
+    {
+        aalta_formula *p_l = eliminateY(af->l_af(), Y);
+        if (p_l == aalta_formula::TRUE())
+            return aalta_formula::TRUE();
+        aalta_formula *p_r = eliminateY(af->r_af(), Y);
+        if (p_r == aalta_formula::TRUE())
+            return aalta_formula::TRUE();
+        if (p_l == aalta_formula::FALSE())
+            return p_r;
+        if (p_r == aalta_formula::FALSE())
+            return p_l;
+        return aalta_formula(aalta_formula::Or, p_l, p_r).unique();
+    }
+    default:
+        assert(false);
+    }
+}

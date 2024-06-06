@@ -59,41 +59,84 @@ aalta_formula *projectOneStep(aalta_formula *af)
     }
 }
 
+Ternary testAcc(aalta_formula *s, unordered_set<int> &to_reduce, unordered_set<int> &reduced, int test_lit)
+{
+    assert(s != NULL);
+    auto op = s->oper();
+    if (op == aalta_formula::True)
+        return Tt;
+    else if (op == aalta_formula::False)
+        return Ff;
+    else if (op == aalta_formula::And || op == aalta_formula::Or)
+    {
+        Ternary l_val = testAcc(s->l_af(), to_reduce, reduced, test_lit);
+        Ternary r_val = testAcc(s->r_af(), to_reduce, reduced, test_lit);
+        return Calculate(op, l_val, r_val);
+    }
+    else if (op == aalta_formula::Not || op >= 11)
+    { // literal
+        int lit = (op >= 11) ? op : (-((s->r_af())->oper()));
+        if (lit == test_lit || (-lit) == test_lit || reduced.find(lit) != reduced.end() || reduced.find(-lit) != reduced.end())
+            return Un;
+        else if (to_reduce.find(lit) != to_reduce.end())
+            return Tt;
+        else if (to_reduce.find(-lit) != to_reduce.end())
+            return Ff;
+        else
+            return (op >= 11) ? Tt : Ff;
+    }
+    assert(false);
+}
+
+aalta_formula *reduceX(aalta_formula *s, aalta_formula *x)
+{
+    unordered_set<int> xset, reduced;
+    x->to_set(xset);
+    fill_in_X_edgeset(xset);
+    for (auto it = xset.begin(); it != xset.end();)
+    {
+        if (testAcc(s, xset, reduced, (*it)) != Un)
+        {
+            reduced.insert(*it);
+            it = xset.erase(it);
+        }
+        else
+            ++it;
+    }
+    if (xset.empty())
+        return aalta_formula::TRUE();
+    auto it = xset.begin();
+    aalta_formula *reduced_formula = int_to_aalta(*it);
+    for (++it; it != xset.end(); ++it)
+        reduced_formula = aalta_formula(aalta_formula::And, reduced_formula, int_to_aalta(*it)).unique();
+    return reduced_formula;
+}
+
 aalta_formula *preprocessAcc(aalta_formula *state_af)
 {
-    aalta_formula *projected_af = projectOneStep(state_af)->simplify();
-    DdNode *af_bdd = FormulaInBdd::ConstructBdd(projected_af);
-    DdNode *neg_af_bdd = Cudd_Not(af_bdd);
-    Cudd_Ref(neg_af_bdd);
-    Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, af_bdd);
-    aalta_formula *blocked_Y = aalta_formula::TRUE();
+    aalta_formula *projected_af = projectOneStep(state_af);
+    aalta_formula *blocked_X = aalta_formula::TRUE();
     const vector<pair<aalta::aalta_formula *, aalta::aalta_formula *>> *m;
-    m = isSat(projected_af, blocked_Y);
-    aalta_formula *y, *neg_y;
+    m = isSat(projected_af, blocked_X);
+    aalta_formula *x, *y, *s_eliminate_y, *not_rx;
     unordered_set<int> yset;
     while (m != NULL)
-    { // cout<<state_af->to_string()<<endl;
+    {//cout<<state_af->to_string()<<endl;
         assert(m->size() == 1);
+        x = m->front().first;//cout<<x->to_string()<<endl;
+        y = m->front().second;//cout<<y->to_string()<<endl;
+        y->to_set(yset);
+        // fill_in_Y_edgeset(yset);
+        s_eliminate_y = eliminateY(projected_af, yset);//cout<<s_eliminate_y->to_string()<<endl;
         yset.clear();
-        y = m->front().second; // cout<<y->to_string()<<endl;
-        DdNode *y_bdd = FormulaInBdd::ConstructBdd(y);
-        DdNode *tmp_Node = Cudd_bddAnd(FormulaInBdd::global_bdd_manager_, neg_af_bdd, y_bdd);
-        Cudd_Ref(tmp_Node);
-        bool baseSwin = (tmp_Node == FormulaInBdd::FALSE_bddP_);
-        Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, tmp_Node);
-        if (baseSwin) // only Y-var in edge_set
-        {
-            Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, y_bdd);
-            Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, neg_af_bdd);
-            return NULL;
-        }
-        Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, y_bdd);
-        neg_y = aalta_formula(aalta_formula::Not, NULL, y).nnf();
-        blocked_Y = aalta_formula(aalta_formula::And, blocked_Y, neg_y).unique();
-        m = isSat(projected_af, blocked_Y);
+        x = reduceX(s_eliminate_y, x);//cout<<x->to_string()<<endl;
+        not_rx = aalta_formula(aalta_formula::Not, NULL, x).nnf();
+        blocked_X = aalta_formula(aalta_formula::And, blocked_X, not_rx).unique();
+        m = isSat(projected_af, blocked_X);
     }
-    Cudd_RecursiveDeref(FormulaInBdd::global_bdd_manager_, neg_af_bdd);
-    return projected_af;
+    blocked_X = blocked_X->simplify();
+    CARChecker checker(blocked_X, false, false);
+    return (checker.check()) ? blocked_X : NULL;
 }
 
 // aalta_formula *preprocessAcc(aalta_formula *state_af)
