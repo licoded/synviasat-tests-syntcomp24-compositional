@@ -154,7 +154,6 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     string temp_filename_string = string(temp_filename);
     vector<char> filename_cstr(temp_filename_string.c_str(), temp_filename_string.c_str() + temp_filename_string.size() + 1);
     dfaExport(dfa, filename_cstr.data(), var_num, var_names, orders);
-    delete temp_filename;
 
     Cudd* mgr = new Cudd();
     bool res = false;

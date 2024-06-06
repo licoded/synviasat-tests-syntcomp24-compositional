@@ -11,15 +11,16 @@ CHECKING		=	ltlfchecker.cpp carchecker.cpp evidence.cpp
 
 SYNTHESIS		=	formula_in_bdd.cpp synthesis.cpp edge_cons.cpp preprocess.cpp
 
-BDD_LIB			=	deps/CUDD-install/lib/libcudd.a
-
 HOME_ROOT		=		/home/lic/syntcomp2024/install_root/usr/local
 INCLUDE_ROOT	=		${HOME_ROOT}/include
 LIBRARY_ROOT	=		${HOME_ROOT}/lib
 
+BDD_LIB			=	${LIBRARY_ROOT}/libcudd.a
+Syft_LIB		=	${LIBRARY_ROOT}/libsynthesis.a
+
 MONA_LIBS		=		${LIBRARY_ROOT}/libmonadfa.a ${LIBRARY_ROOT}/libmonamem.a ${LIBRARY_ROOT}/libmonabdd.a
 
-ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTILFILES) $(SYNTHESIS) $(BDD_LIB) ${MONA_LIBS}
+ALLFILES		=	main.cpp $(CHECKING) $(SOLVER) $(FORMULAFILES) $(PARSERFILES) $(UTILFILES) $(SYNTHESIS) $(BDD_LIB) ${Syft_LIB} ${MONA_LIBS}
 
 
 CC	    =   g++ -std=c++11

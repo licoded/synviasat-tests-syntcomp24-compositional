@@ -5,13 +5,13 @@
 #include <cstring>
 #include <unordered_set>
 #include <synthesis/syn.h>
+#include <cuddObj.hh>
 
 #include "formula/aalta_formula.h"
 #include "edge_cons.h"
 #include "formula_in_bdd.h"
 #include "syn_type.h"
 #include "graph.h"
-#include "deps/CUDD-install/include/cudd.h"
 
 using namespace std;
 using namespace aalta;
