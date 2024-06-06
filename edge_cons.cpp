@@ -60,16 +60,19 @@ edgeCons::edgeCons(DdNode *src_bdd, aalta_formula *state_af, aalta_formula *acc_
     for (const auto &it : XCons_related_succ)
         delete it.second;
     for (int i = 0; i < X_cons_.size(); ++i)
+    {
         if (X_cons_[i]->get_status() == Ewin)
             // ewin_Y_idx_.insert(i);
             insert_ewin_Y_idx(i);
         else if (X_cons_[i]->get_status() == Swin)
         {
             status_ = Swin;
-            return;
         }
         else if (X_cons_[i]->get_status() == Dfs_complete)
             insert_dfs_complete_Y_idx(i);
+        if (X_cons_[i]->get_status() != Dfs_incomplete)
+            insert_trav_all_afY_Y_idx(i);
+    }
     if (ewin_Y_idx_.size() == Y_parts_.size())
         status_ = Ewin;
     else if (ewin_Y_idx_.size() + dfs_complete_Y_idx_.size() == Y_parts_.size())
@@ -321,6 +324,29 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
     return true;
 }
 
+bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge,
+                       queue<pair<aalta_formula *, aalta_formula *>> &model)
+{
+    aalta_formula *edge_af = NULL;
+    if (current_Y_idx_ == -1)
+    {
+        if (current_Y_idx_ == -1)
+            for (int i = 0; i < Y_parts_.size(); ++i)
+                if (trav_all_afY_Y_idx_.find(i) == trav_all_afY_Y_idx_.end())
+                {
+                    current_Y_idx_ = i;
+                    break;
+                }
+    }
+    aalta_formula *af_Y = Y_parts_[current_Y_idx_];
+    aalta_formula *af_X = X_cons_[current_Y_idx_]->getEdge();
+    edge_af = aalta_formula(aalta_formula::And, af_X, af_Y).unique()->simplify();
+    edge_af->to_set(edge);
+    // cout<<edge_af->to_string()<<endl;
+    fill_in_edgeset(edge);
+    return true;
+}
+
 aalta_formula *XCons::getEdge()
 {
     assert(current_X_idx_ == -1);
@@ -332,6 +358,33 @@ aalta_formula *XCons::getEdge()
             break;
         }
     return X_parts_[current_X_idx_];
+}
+
+void edgeCons::get_succ_edges(vector<Syn_Edge> &succ_edges)
+{
+    assert(X_cons_.size() == Y_parts_.size());
+    for (int i = 0; i < X_cons_.size(); ++i)
+    {
+        if (X_cons_[i]->get_status() == Ewin)
+            break;
+        aalta_formula *af_Y = Y_parts_[i];
+        X_cons_[i]->get_succ_X_edges(af_Y, succ_edges);
+    }
+}
+
+void XCons::get_succ_X_edges(aalta_formula *af_Y, vector<Syn_Edge> &succ_edges)
+{
+    assert(X_parts_.size() == successors_.size());
+    for (int i = 0; i < X_parts_.size(); ++i)
+    {
+        DdNode *succ_bdd = successors_[i];
+        if (Syn_Frame::ewin_state_bdd_set.find(ull(succ_bdd)) !=
+            Syn_Frame::ewin_state_bdd_set.end())
+            continue;
+        aalta_formula *af_X = X_parts_[i];
+        aalta_formula *af_edge = aalta_formula(aalta_formula::And, af_Y, af_X).unique();
+        succ_edges.push_back({succ_bdd, af_edge});
+    }
 }
 
 // aalta_formula *edgeCons::set_search_direction(const pair<aalta_formula *, aalta_formula *> &XY)
@@ -405,6 +458,15 @@ void edgeCons::insert_dfs_complete_Y_idx(int y)
         dfs_complete_Y_idx_.insert(y);
         aalta_formula *not_Y = aalta_formula(aalta_formula::Not, NULL, Y_parts_[y]).nnf();
         blocked_Y_ = (aalta_formula(aalta_formula::And, blocked_Y_, not_Y).simplify())->unique();
+    }
+}
+
+void edgeCons::insert_trav_all_afY_Y_idx(int y)
+{
+    if (trav_all_afY_Y_idx_.find(y) == trav_all_afY_Y_idx_.end())
+    {
+        trav_all_afY_Y_idx_.insert(y);
+        traved_Y_ = (aalta_formula(aalta_formula::Or, traved_Y_, Y_parts_[y]).simplify())->unique();
     }
 }
 

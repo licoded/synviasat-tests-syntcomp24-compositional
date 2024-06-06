@@ -10,6 +10,7 @@
 #include "formula/aalta_formula.h"
 #include "synthesis.h"
 #include "syn_type.h"
+#include "graph.h"
 #include "formula_in_bdd.h"
 #include "deps/CUDD-install/include/cudd.h"
 
@@ -17,6 +18,8 @@ using namespace std;
 using namespace aalta;
 
 typedef unsigned long long ull;
+using Syn_Edge = pair<DdNode *, aalta_formula *>;
+using Syn_Graph = MyGraph<DdNode *, aalta_formula *>;
 
 class XCons
 {
@@ -30,6 +33,7 @@ public:
     int find_match_X_idx(aalta_formula *X);
     // aalta_formula *get_blocked_X() { return blocked_X_; }
     bool checkSwinForBackwardSearch();
+    void get_succ_X_edges(aalta_formula *af_Y, vector<Syn_Edge> &succ_edges);
 
 private:
     vector<aalta_formula *> X_parts_;
@@ -64,11 +68,16 @@ public:
     void processSignal(Signal, DdNode *succ);
     bool getEdge(unordered_set<int> &edge,
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
+    bool getEdge_wholeDFA(unordered_set<int> &edge,
+                 queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
+    bool hasTravAllEdges() { return trav_all_afY_Y_idx_.size() == Y_parts_.size(); }
+    void get_succ_edges(vector<Syn_Edge> &succ_edges);
 
 private:
     aalta_formula *state_af_;
     aalta_formula *blocked_Y_;
+    aalta_formula *traved_Y_;
 
     vector<aalta_formula *> Y_parts_;
     vector<XCons *> X_cons_;
@@ -77,6 +86,7 @@ private:
 
     set<int> ewin_Y_idx_;
     set<int> dfs_complete_Y_idx_;
+    set<int> trav_all_afY_Y_idx_;
 
     Status status_;
     int current_Y_idx_;
@@ -86,6 +96,7 @@ private:
     int find_match_Y_idx(aalta_formula *Y);
     void insert_ewin_Y_idx(int y);
     void insert_dfs_complete_Y_idx(int y);
+    void insert_trav_all_afY_Y_idx(int y);
     bool checkConflict(pair<aalta_formula *, aalta_formula *> &edge)
     {
         return FormulaInBdd::check_conflict(
