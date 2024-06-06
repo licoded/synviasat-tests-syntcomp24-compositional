@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstring>
 #include <unordered_set>
+#include <synthesis/syn.h>
 
 #include "formula/aalta_formula.h"
 #include "edge_cons.h"
@@ -44,6 +45,8 @@ private:
 public:
     static set<int> var_X, var_Y;
     static unsigned int num_varX, num_varY;
+
+    static string partfile;
 
     static unordered_set<ull> swin_state_bdd_set;
     static unordered_set<ull> ewin_state_bdd_set;

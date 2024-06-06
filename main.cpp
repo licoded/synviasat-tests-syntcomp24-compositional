@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 		cout << "cannot open file " << argv[2] << endl;
 		return 0;
 	}
+	Syn_Frame::partfile = string(argv[2]);
 	fin >> tmp;
 	while (fin >> tmp)
 	{

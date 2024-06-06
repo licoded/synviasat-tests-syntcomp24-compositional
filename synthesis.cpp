@@ -25,6 +25,7 @@ unsigned int Syn_Frame::num_varX;
 unsigned int Syn_Frame::num_varY;
 set<int> Syn_Frame::var_X;
 set<int> Syn_Frame::var_Y;
+string Syn_Frame::partfile;
 unordered_set<ull> Syn_Frame::swin_state_bdd_set;
 unordered_set<ull> Syn_Frame::Syn_Frame::ewin_state_bdd_set;
 unordered_set<ull> Syn_Frame::dfs_complete_state_bdd_set;
@@ -111,7 +112,8 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         var_names[var_cnt][var_str.size()] = '\0';
         var_cnt++;
     }
-    auto orders = string2char_ptr(string('0', var_num));
+    char* orders = new char[var_num+1];
+    memset(orders, 2, var_num);
     unsigned int *var_index = new unsigned int[var_num];
     int *indicies = new int[var_num];
     for (int i = 0; i < var_num; i++) {
@@ -135,11 +137,11 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
         DFA *dfa_cur_min = dfaMinimize(dfa_cur);
         free(dfa_cur);
-        string af_s = it->to_string();
-        // delete all spaces from af_s
-        af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
-        string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
-        string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
+        // string af_s = it->to_string();
+        // // delete all spaces from af_s
+        // af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
+        // string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
+        // string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
 
         // printDFA(dfa_cur_min, dot_filename, var_num, var_index);
 
@@ -148,13 +150,25 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         dfa = dfaMinimize(dfa);
     }
 
-    string wholedfa_filename = "examples/temp-drafts/whole.dfa";
+    char* temp_filename = tmpnam(nullptr);
+    string temp_filename_string = string(temp_filename);
+    vector<char> filename_cstr(temp_filename_string.c_str(), temp_filename_string.c_str() + temp_filename_string.size() + 1);
+    dfaExport(dfa, filename_cstr.data(), var_num, var_names, orders);
+    delete temp_filename;
+
+    Cudd* mgr = new Cudd();
+    bool res = false;
+    std::unordered_map<unsigned, BDD> strategy;
+    Syft::syn test(mgr, temp_filename_string, Syn_Frame::partfile);
+    bool syn_res = test.realizablity_env(strategy);
+
+    // string wholedfa_filename = "examples/temp-drafts/whole.dfa";
     // string wholedfa2dot_filename = "examples/temp-drafts/whole_dfa2.dot";
     // string wholedot_filename = "examples/temp-drafts/whole.dot";
     // printDFA(dfa, wholedot_filename, var_num, var_index);
-    char *wholedfa_filename_char_ptr = string2char_ptr(wholedfa_filename);
-    dfaExport(dfa, wholedfa_filename_char_ptr, var_num, var_names, orders);
-    delete[] wholedfa_filename_char_ptr;
+    // char *wholedfa_filename_char_ptr = string2char_ptr(wholedfa_filename);
+    // dfaExport(dfa, wholedfa_filename_char_ptr, var_num, var_names, orders);
+    // delete[] wholedfa_filename_char_ptr;
     // system(("/home/lic/syntcomp2024/install_root/usr/local/bin/dfa2dot \""+wholedfa_filename+"\" \""+wholedfa2dot_filename+"\"").c_str());
 
     // TODO: delete char** and char*
@@ -166,7 +180,8 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         delete[] var_names[i];
     delete[] var_names;
 
-    return dfa_backward_check(wholedfa_filename);
+    // return dfa_backward_check(wholedfa_filename);
+    return syn_res;
 }
 
 bool forwardSearch(Syn_Frame *init_frame)
