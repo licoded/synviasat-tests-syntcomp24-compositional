@@ -735,9 +735,9 @@ bool dfa_backward_check(string &dfa_filename)
     MonaDFA_Graph mona_graph;
     monaDFA2graph(mona_graph, my_dfa);
 
-    using MyYCons = pair<ull, int>;
-    using MyXCons = unordered_map<ull, vector<MyYCons>*>;
-    using MyEdgeCons = unordered_map<int, MyXCons *>;
+    using MyXCons = pair<ull, int>;
+    using MyYCons = unordered_map<ull, vector<MyXCons>*>;
+    using MyEdgeCons = unordered_map<int, MyYCons *>;
     MyEdgeCons edge_cons_map;
     unordered_map<int, set<int>*> predecessors_map;
 
@@ -749,7 +749,7 @@ bool dfa_backward_check(string &dfa_filename)
             continue;
         }
         auto vertex_edges = mona_graph.edges[vertex];
-        MyXCons *vertex_XCons = new MyXCons();
+        MyYCons *vertex_YCons = new MyYCons();
         for (auto edge : vertex_edges)
         {
             auto edge_af = edge.label;
@@ -772,13 +772,13 @@ bool dfa_backward_check(string &dfa_filename)
             ull afY_bddP = ull(afY_in_bdd->GetBddPointer());
             delete afX_in_bdd;
             delete afY_in_bdd;
-            if (vertex_XCons->find(afX_bddP) == vertex_XCons->end())
+            if (vertex_YCons->find(afY_bddP) == vertex_YCons->end())
             {
-                vertex_XCons->insert({afX_bddP, new vector<MyYCons>()});
+                vertex_YCons->insert({afY_bddP, new vector<MyXCons>()});
             }
-            vertex_XCons->at(afX_bddP)->push_back({afY_bddP, successor});
+            vertex_YCons->at(afY_bddP)->push_back({afX_bddP, successor});
         }
-        edge_cons_map.insert({vertex, vertex_XCons});
+        edge_cons_map.insert({vertex, vertex_YCons});
     }
 
     set<int> cur_swin, new_swin, swin;
@@ -815,21 +815,21 @@ bool dfa_backward_check(string &dfa_filename)
         {
             if (edge_cons_map[s] == NULL)
                 continue;
-            bool cur_s_isSwin = true;
-            for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
+            bool cur_s_isSwin = false;
+            for (auto afY_myXCons_vec_pair : *edge_cons_map[s])
             {
-                bool cur_afX_toSwin = false;
-                for (auto myYCons : *(afX_myYCons_vec_pair.second))
+                bool cur_afY_toSwin = true;
+                for (auto myXCons : *(afY_myXCons_vec_pair.second))
                 {
-                    if (swin.find(myYCons.second) != swin.end())
+                    if (swin.find(myXCons.second) == swin.end())
                     {
-                        cur_afX_toSwin = true;
+                        cur_afY_toSwin = false;
                         break;
                     }
                 }
-                if (!cur_afX_toSwin)
+                if (cur_afY_toSwin)
                 {
-                    cur_s_isSwin = false;
+                    cur_s_isSwin = true;
                     break;
                 }
             }
