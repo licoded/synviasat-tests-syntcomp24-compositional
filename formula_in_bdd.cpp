@@ -108,7 +108,7 @@ void FormulaInBdd::fixXYOrder(std::set<int> &X_vars, std::set<int> &Y_vars)
     Y_var_nums = Y_vars.size();
     total_var_nums = X_var_nums + Y_var_nums;
     int var_cnt = 0;
-    for (auto item : Y_vars)
+    for (auto item : X_vars)
     {
         aalta_formula *af = aalta_formula(item, NULL, NULL).unique();
         aaltaP_map_created.insert(ull(af));
@@ -119,7 +119,7 @@ void FormulaInBdd::fixXYOrder(std::set<int> &X_vars, std::set<int> &Y_vars)
         bddIdx_to_aaltaP_[var_cnt++] = ull(af);
         Cudd_Ref((DdNode *)(aaltaP_to_bddP_[ull(af)]));
     }
-    for (auto item : X_vars)
+    for (auto item : Y_vars)
     {
         aalta_formula *af = aalta_formula(item, NULL, NULL).unique();
         aaltaP_map_created.insert(ull(af));

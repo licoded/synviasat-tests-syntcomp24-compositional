@@ -35,8 +35,8 @@ private:
 public:
     static unsigned int X_var_nums, Y_var_nums, total_var_nums;
     static DdManager *global_bdd_manager_;
-    static bool is_X_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= Y_var_nums && Cudd_NodeReadIndex(node) < total_var_nums; }
-    static bool is_Y_var(DdNode *node) { return Cudd_NodeReadIndex(node) < Y_var_nums; }
+    static bool is_Y_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= X_var_nums && Cudd_NodeReadIndex(node) < total_var_nums; }
+    static bool is_X_var(DdNode *node) { return Cudd_NodeReadIndex(node) < X_var_nums; }
     static bool is_notXY_var(DdNode *node) { return Cudd_NodeReadIndex(node) >= total_var_nums; }
     static bool is_Next_var(DdNode *node) { return is_notXY_var(node) && !Cudd_IsConstant(node); }
     static aalta_formula *get_af_var(int node_idx) { return (aalta_formula *)bddIdx_to_aaltaP_[node_idx]; }
