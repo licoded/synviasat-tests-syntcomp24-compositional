@@ -112,7 +112,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         var_names[var_cnt][var_str.size()] = '\0';
         var_cnt++;
     }
-    reverse(var_names, var_names + var_num);
+    // reverse(var_names, var_names + var_num);
     char* orders = new char[var_num+1];
     memset(orders, 2, var_num);
     unsigned int *var_index = new unsigned int[var_num];
