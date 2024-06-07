@@ -95,22 +95,21 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
     // prepare for export DFA
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
     char **var_names = new char *[var_num];
-    int var_cnt = 0;
     for (auto item : Syn_Frame::var_X)
     {
         auto var_str = aalta_formula(item, NULL, NULL).to_string();
-        var_names[var_cnt] = new char[var_str.size() + 1];
-        strcpy(var_names[var_cnt], var_str.c_str());
-        var_names[var_cnt][var_str.size()] = '\0';
-        var_cnt++;
+        int var_idx = item - 12;
+        var_names[var_idx] = new char[var_str.size() + 1];
+        strcpy(var_names[var_idx], var_str.c_str());
+        var_names[var_idx][var_str.size()] = '\0';
     }
     for (auto item : Syn_Frame::var_Y)
     {
         auto var_str = aalta_formula(item, NULL, NULL).to_string();
-        var_names[var_cnt] = new char[var_str.size() + 1];
-        strcpy(var_names[var_cnt], var_str.c_str());
-        var_names[var_cnt][var_str.size()] = '\0';
-        var_cnt++;
+        int var_idx = item - 12;
+        var_names[var_idx] = new char[var_str.size() + 1];
+        strcpy(var_names[var_idx], var_str.c_str());
+        var_names[var_idx][var_str.size()] = '\0';
     }
     // reverse(var_names, var_names + var_num);
     char* orders = new char[var_num+1];
@@ -135,8 +134,10 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         Syn_Frame *init = new Syn_Frame(it);
         DdNode *init_bddP = init->GetBddPointer();
         forwardSearch_wholeDFA(init, graph);
-        // cout << "sub_af:\t" << it->to_string() << endl;
-        // printGraph(graph); // for DEBUG
+#ifdef DEBUG
+        cout << "sub_af:\t" << it->to_string() << endl;
+        printGraph(graph); // for DEBUG
+#endif
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
         if (MinizeFlag)
@@ -150,7 +151,9 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         string af_s = it->to_string();
         // delete all spaces from af_s
         af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
-        // string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
+        string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
+        vector<char> dfa_filename_vec(dfa_filename.c_str(), dfa_filename.c_str() + dfa_filename.size() + 1);
+        dfaExport(dfa, dfa_filename_vec.data(), var_num, var_names, orders);
         string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
         printDFA(dfa_cur_min, dot_filename, var_num, var_index);
 #endif
