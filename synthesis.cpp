@@ -374,9 +374,9 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
     while (dfs_cur >= 0)
     {
         Status cur_state_status = dfs_sta[dfs_cur]->checkStatus();
-        bool cur_state_hasTravAll_flag = dfs_sta[dfs_cur]->hasTravAllEdges();
+        bool cur_state_should_stopSearch_flag = dfs_sta[dfs_cur]->hasTravAllEdges() || (dfs_sta[dfs_cur]->get_status() == Ewin);
         DdNode *cur_bddP = dfs_sta[dfs_cur]->GetBddPointer();
-        if (cur_state_hasTravAll_flag)
+        if (cur_state_should_stopSearch_flag)
         {
             if (dfn.at((ull)cur_bddP) == low.at((ull)cur_bddP))
             {
