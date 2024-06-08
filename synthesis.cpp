@@ -585,9 +585,11 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
 {
     // assert(graph.vertices.size() > 2);  // NOTE: other cases: 1. sth. -> alway true/false 2. init is true/false !!!
     unordered_map<ull, int> bddP_to_stateid;
+    unordered_map<int, ull> stateid_to_bddP;
     int stateid_cnt = 0;
     // insert all vertex into bddP_to_stateid
     // INSERT-1. init_bddP
+    int init_stateid = 0;
     auto init_vertex_Iter = graph.vertices.find(init_bddP);
     assert(init_vertex_Iter != graph.vertices.end());
     bddP_to_stateid.insert({ull(init_bddP), stateid_cnt++});
@@ -606,6 +608,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     }
 
     dfaSetup(bddP_to_stateid.size(), var_num, indicies);
+    vector<bool> state_visited(bddP_to_stateid.size(), 0);
     // EDGE-1. init_bddP
     auto init_edges_Iter = graph.edges.find(init_bddP);
     if (init_edges_Iter != graph.edges.end())
@@ -627,16 +630,30 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
         dfaAllocExceptions(0);
         dfaStoreState(false_stateid);
     }
+    state_visited[init_stateid] = true;
     // EDGE-2. true and false
     dfaAllocExceptions(0);
     dfaStoreState(true_stateid);
+    state_visited[true_stateid] = true;
     dfaAllocExceptions(0);
     dfaStoreState(false_stateid);
+    state_visited[false_stateid] = true;
     // EDGE-3. others
-    for (auto vertex_and_succ_edges_pair : graph.edges)
+    assert(stateid_cnt == bddP_to_stateid.size());
+    for (int i = 0; i < stateid_cnt; i++)
     {
-        auto vertexBddP = vertex_and_succ_edges_pair.first;
-        auto succ_edges = vertex_and_succ_edges_pair.second;
+        if (state_visited[i])
+            continue;
+        auto vertex = (DdNode *)stateid_to_bddP[i];
+        auto succ_edges_Iter = graph.edges.find(vertex);
+        if (succ_edges_Iter == graph.edges.end())
+        {
+            dfaAllocExceptions(0);
+            dfaStoreState(false_stateid);
+            continue;
+        }
+        /* Else */
+        auto succ_edges = succ_edges_Iter->second;
         dfaAllocExceptions(succ_edges.size());
         for (auto edge : succ_edges)
         {
@@ -645,7 +662,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
             dfaStoreException(dest_stateid, bin_edge_ptr);
             delete[] bin_edge_ptr;
         }
-        dfaStoreState(false_stateid);   // NOTE: I think there are no default transitions!!!
+        dfaStoreState(false_stateid);
     }
     // get state_type_arr_s
     assert(bddP_to_stateid.size() > 2);
@@ -941,7 +958,7 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     {
         if (isAcc_byEmpty_bddP_map.find(ull(state_in_bdd_->GetBddPointer())) == isAcc_byEmpty_bddP_map.end())
         {
-            isAcc_byEmpty_bddP_map.insert({ull(state_in_bdd_->GetBddPointer()), IsEmptyAcc(af)});
+            isAcc_byEmpty_bddP_map.insert({ull(state_in_bdd_->GetBddPointer()), IsEmptyAcc(af->nnf())});
         }
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, aalta_formula::TRUE());
         status_ = edgeCons_->get_status();

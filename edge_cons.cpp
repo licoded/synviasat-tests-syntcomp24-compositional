@@ -255,7 +255,11 @@ void YCons::processSignal(Signal sig, DdNode *succ)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
+        {
             insert_ewin_Y_idx(it->second);
+            if(WholeDFA_FLAG)
+                insert_trav_all_afY_Y_idx(it->second);
+        }
         if (ewin_Y_idx_.size() == Y_parts_.size())
             status_ = Ewin;
         else if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
@@ -278,7 +282,11 @@ void YCons::processSignal(Signal sig, DdNode *succ)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
+        {
             insert_searched_Y_idx(it->second);
+            if(WholeDFA_FLAG)
+                insert_trav_all_afY_Y_idx(it->second);
+        }
         if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
             status_ = Dfs_complete;
     }

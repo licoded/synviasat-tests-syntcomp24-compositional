@@ -301,7 +301,7 @@ bool IsEmptyAcc(aalta_formula *state_af)
     switch (op)
     {
     case aalta_formula::Not:
-        return !IsEmptyAcc(state_af->r_af());
+        return false;
     case aalta_formula::True:
     case aalta_formula::WNext:
     case aalta_formula::Release:
