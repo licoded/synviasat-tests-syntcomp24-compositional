@@ -83,7 +83,6 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         Syn_Frame *init = new Syn_Frame(it);
         if (!forwardSearch(init))
             return false;
-        delete init;
     }
 
     if (and_sub_afs.size() == 1)
@@ -202,7 +201,10 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 bool forwardSearch(Syn_Frame *init_frame)
 {
     if (init_frame->get_status() == Swin)
+    {
+        delete init_frame;
         return true;
+    }
     dfs_time = 0;
     dfn.clear(), low.clear();
     int dfs_cur = 0;
