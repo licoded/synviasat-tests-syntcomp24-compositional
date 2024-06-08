@@ -400,9 +400,6 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
             {
                 Syn_Frame *predecessor_fr = dfs_sta[dfs_cur];
                 Signal signal = To_swin;
-                /* NOTE: add isAcc_byEmpty_bddP_map to force those states processSignal with Swin to their predecessors */
-                if (Syn_Frame::isAcc_byEmpty_bddP_map[ull(cur_bddP)])
-                    signal = To_swin;
                 if (cur_state_status == Ewin)
                     signal = To_ewin;
                 else if (cur_state_status == Dfs_complete)
@@ -429,7 +426,7 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
             continue;
 
         {
-            aalta_formula *next_af = FormulaProgression(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set); //->simplify();
+            aalta_formula *next_af = FormulaProgression_empty(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set); //->simplify();
             // cout<<next_af->to_string()<<endl;
             Syn_Frame *next_frame = new Syn_Frame(next_af);
 
@@ -965,6 +962,8 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
         }
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, aalta_formula::TRUE());
         status_ = edgeCons_->get_status();
+        if (isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
+            status_ = Swin;
     }
     else if (status_ != Swin)
     {
@@ -982,6 +981,8 @@ Syn_Frame::~Syn_Frame()
 Status Syn_Frame::checkStatus()
 {
     status_ = edgeCons_->get_status();
+    if (WholeDFA_FLAG && isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
+        status_ = Swin;
     DdNode *bddp = GetBddPointer();
     if (status_ == Dfs_incomplete)
         if (swin_state_bdd_set.find(ull(bddp)) != swin_state_bdd_set.end())
@@ -1043,6 +1044,9 @@ void PartitionAtoms(aalta_formula *af, unordered_set<string> &env_val)
 
 void Syn_Frame::processSignal(Signal sig, DdNode *succ)
 {
+    /* NOTE: add isAcc_byEmpty_bddP_map to force those states processSignal with Swin to their predecessors */
+    if (Syn_Frame::isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
+        sig = To_swin;
     edgeCons_->processSignal(sig, succ);
 }
 
