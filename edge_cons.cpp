@@ -111,7 +111,7 @@ YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
             edge_af->to_set(edge_var_set);
             fill_in_edgeset(edge_var_set);
             aalta_formula *succ_state_af;
-            if (IsAcc(state_af, edge_var_set))
+            if (!WholeDFA_FLAG && IsAcc(state_af, edge_var_set))
                 succ_state_af = aalta_formula::TRUE();
             else
                 succ_state_af = FormulaProgression(state_af, edge_var_set); //->simplify();

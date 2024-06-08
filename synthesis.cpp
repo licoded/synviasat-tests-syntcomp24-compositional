@@ -422,13 +422,6 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
         if (!exist_edge_to_explorer)
             continue;
 
-        if (IsAcc(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set)) // i.e. next_frame is true/swin
-        {
-            dfs_sta[dfs_cur]->processSignal(To_swin, FormulaInBdd::TRUE_bddP_);
-            while (!model.empty())
-                model.pop();
-        }
-        else
         {
             aalta_formula *next_af = FormulaProgression(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set); //->simplify();
             // cout<<next_af->to_string()<<endl;

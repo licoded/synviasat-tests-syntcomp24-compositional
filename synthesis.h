@@ -85,6 +85,7 @@ public:
     {
         for (auto it : Syn_Frame::predecessors)
             delete it.second;
+        predecessors.clear();
     }
     static Status getBddStatus(DdNode *b)
     {
