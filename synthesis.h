@@ -48,6 +48,8 @@ public:
 
     static string partfile;
 
+    static unordered_map<ull, bool> isAcc_byEmpty_bddP_map;
+
     static unordered_set<ull> swin_state_bdd_set;
     static unordered_set<ull> ewin_state_bdd_set;
     static unordered_set<ull> dfs_complete_state_bdd_set;

@@ -26,6 +26,7 @@ unsigned int Syn_Frame::num_varY;
 set<int> Syn_Frame::var_X;
 set<int> Syn_Frame::var_Y;
 string Syn_Frame::partfile;
+unordered_map<ull, bool> Syn_Frame::isAcc_byEmpty_bddP_map;
 unordered_set<ull> Syn_Frame::swin_state_bdd_set;
 unordered_set<ull> Syn_Frame::Syn_Frame::ewin_state_bdd_set;
 unordered_set<ull> Syn_Frame::dfs_complete_state_bdd_set;
@@ -90,6 +91,8 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
     WholeDFA_FLAG = true;
     SAT_TRACE_FLAG = false;
+    Syn_Frame::isAcc_byEmpty_bddP_map.insert({ull(FormulaInBdd::TRUE_bddP_), true});
+    Syn_Frame::isAcc_byEmpty_bddP_map.insert({ull(FormulaInBdd::FALSE_bddP_), false});
 
     // prepare for export DFA
     int var_num = Syn_Frame::num_varX + Syn_Frame::num_varY;
@@ -646,12 +649,20 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     }
     // get state_type_arr_s
     assert(bddP_to_stateid.size() > 2);
-    bddP_to_stateid.erase(ull(init_bddP));
-    bddP_to_stateid.erase(ull(FormulaInBdd::TRUE_bddP_));
-    bddP_to_stateid.erase(ull(FormulaInBdd::FALSE_bddP_));
     string state_type_s = string(bddP_to_stateid.size(), '0');
+    for (auto bddP_and_stateid_pair : bddP_to_stateid)
+    {
+        auto bddP = bddP_and_stateid_pair.first;
+        auto stateid = bddP_and_stateid_pair.second;
+        if (Syn_Frame::isAcc_byEmpty_bddP_map[bddP])
+            state_type_s[stateid] = '+';
+        else if (Syn_Frame::ewin_state_bdd_set.find(ull(bddP)) != Syn_Frame::ewin_state_bdd_set.end())
+            state_type_s[stateid] = '-';
+        else
+            state_type_s[stateid] = '0';
+    }
     /**
-     * TODO: change state_type of some state from 0 to +
+     * DONE: change state_type of some state from 0 to +
      * NOTE: in following context, a is env var, b is sys var
      * 1. wnext state, e.g.
      *      - X(a)
@@ -661,8 +672,6 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
      * 2. release state, e.g.
      *      - false R a     i.e.      G(a)
     */
-    /* TODO: change state_type of wnext state from 0 to + */
-    state_type_s = "0+-" + state_type_s;
     // cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
     auto state_type_char_ptr = string2char_ptr(state_type_s);
     DFA *dfa = dfaBuild(state_type_char_ptr);
@@ -930,6 +939,10 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     state_in_bdd_ = new FormulaInBdd(af);
     if (WholeDFA_FLAG)
     {
+        if (isAcc_byEmpty_bddP_map.find(ull(state_in_bdd_->GetBddPointer())) == isAcc_byEmpty_bddP_map.end())
+        {
+            isAcc_byEmpty_bddP_map.insert({ull(state_in_bdd_->GetBddPointer()), IsEmptyAcc(af)});
+        }
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, aalta_formula::TRUE());
         status_ = edgeCons_->get_status();
     }
