@@ -255,16 +255,15 @@ aalta_formula *FormulaProgression_empty(aalta_formula *predecessor, unordered_se
             return aalta_formula::TRUE();
         aalta_formula *l_fp = FormulaProgression_empty(predecessor->l_af(), edge);
         aalta_formula *second_part = NULL;
+        aalta_formula *predecessor_afterFP = FormulaProgression_empty(aalta_formula(aalta_formula::Next, NULL, predecessor).unique(), edge);
         if ((l_fp->oper()) == aalta_formula::True)
         {
-            if (first_part == predecessor->r_af())
-                return predecessor;
-            second_part = predecessor;
+            second_part = predecessor_afterFP;
         }
         else if ((l_fp->oper()) == aalta_formula::False)
             return first_part;
         else
-            second_part = aalta_formula(aalta_formula::And, l_fp, predecessor).unique();
+            second_part = aalta_formula(aalta_formula::And, l_fp, predecessor_afterFP).unique();
         if ((first_part->oper()) == aalta_formula::False)
             return second_part;
         else
@@ -279,10 +278,11 @@ aalta_formula *FormulaProgression_empty(aalta_formula *predecessor, unordered_se
         aalta_formula *second_part = NULL;
         if ((l_fp->oper()) == aalta_formula::True)
             return first_part;
-        else if ((l_fp->oper()) == aalta_formula::False)
-            second_part = predecessor;
+        aalta_formula *predecessor_afterFP = FormulaProgression_empty(aalta_formula(aalta_formula::WNext, NULL, predecessor).unique(), edge);
+        if ((l_fp->oper()) == aalta_formula::False)
+            second_part = predecessor_afterFP;
         else
-            second_part = aalta_formula(aalta_formula::Or, l_fp, predecessor).unique();
+            second_part = aalta_formula(aalta_formula::Or, l_fp, predecessor_afterFP).unique();
         if ((first_part->oper()) == aalta_formula::True)
             return second_part;
         else
