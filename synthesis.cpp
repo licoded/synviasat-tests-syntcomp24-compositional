@@ -593,11 +593,17 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     auto init_vertex_Iter = graph.vertices.find(init_bddP);
     assert(init_vertex_Iter != graph.vertices.end());
     bddP_to_stateid.insert({ull(init_bddP), stateid_cnt++});
+    stateid_to_bddP.insert({stateid_cnt-1, ull(init_bddP)});
+    assert(init_stateid == stateid_cnt-1);
     graph.vertices.erase(init_bddP);
     // INSERT-2. false and true
     int true_stateid = 1, false_stateid = 2;
     bddP_to_stateid.insert({ull(FormulaInBdd::TRUE_bddP_), stateid_cnt++});
+    stateid_to_bddP.insert({stateid_cnt-1, ull(FormulaInBdd::TRUE_bddP_)});
+    assert(true_stateid == stateid_cnt-1);
     bddP_to_stateid.insert({ull(FormulaInBdd::FALSE_bddP_), stateid_cnt++});
+    stateid_to_bddP.insert({stateid_cnt-1, ull(FormulaInBdd::FALSE_bddP_)});
+    assert(false_stateid == stateid_cnt-1);
     graph.vertices.erase(FormulaInBdd::TRUE_bddP_);
     graph.vertices.erase(FormulaInBdd::FALSE_bddP_);
     // INSERT-2. others
@@ -605,6 +611,7 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     {
         assert(bddP_to_stateid.find(ull(vertex)) == bddP_to_stateid.end());
         bddP_to_stateid.insert({ull(vertex), stateid_cnt++});
+        stateid_to_bddP.insert({stateid_cnt-1, ull(vertex)});
     }
 
     dfaSetup(bddP_to_stateid.size(), var_num, indicies);
