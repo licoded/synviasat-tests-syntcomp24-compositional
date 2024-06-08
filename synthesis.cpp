@@ -653,7 +653,22 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
     }
     // get state_type_arr_s
     assert(bddP_to_stateid.size() > 2);
-    string state_type_s = bddP_to_stateid.size() > 3 ? string(bddP_to_stateid.size()-3, '0') : "";
+    bddP_to_stateid.erase(ull(init_bddP));
+    bddP_to_stateid.erase(ull(FormulaInBdd::TRUE_bddP_));
+    bddP_to_stateid.erase(ull(FormulaInBdd::FALSE_bddP_));
+    string state_type_s = string(bddP_to_stateid.size(), '0');
+    /**
+     * TODO: change state_type of some state from 0 to +
+     * NOTE: in following context, a is env var, b is sys var
+     * 1. wnext state, e.g.
+     *      - X(a)
+     *      - X(a) & X(b)
+     *      - X(a) & a
+     *      - a & X(b)
+     * 2. release state, e.g.
+     *      - false R a     i.e.      G(a)
+    */
+    /* TODO: change state_type of wnext state from 0 to + */
     state_type_s = "0+-" + state_type_s;
     // cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
     auto state_type_char_ptr = string2char_ptr(state_type_s);
