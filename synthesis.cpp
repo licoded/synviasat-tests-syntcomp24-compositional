@@ -152,7 +152,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         af_s.erase(remove(af_s.begin(), af_s.end(), ' '), af_s.end());
         string dfa_filename = "examples/temp-drafts/" + af_s + ".dfa";
         vector<char> dfa_filename_vec(dfa_filename.c_str(), dfa_filename.c_str() + dfa_filename.size() + 1);
-        dfaExport(dfa, dfa_filename_vec.data(), var_num, var_names, orders);
+        dfaExport(dfa_cur_min, dfa_filename_vec.data(), var_num, var_names, orders);
         string dot_filename = "examples/temp-drafts/" + af_s + ".dot";
         printDFA(dfa_cur_min, dot_filename, var_num, var_index);
 #endif
@@ -433,14 +433,6 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
             aalta_formula *next_af = FormulaProgression(dfs_sta[dfs_cur]->GetFormulaPointer(), edge_var_set); //->simplify();
             // cout<<next_af->to_string()<<endl;
             Syn_Frame *next_frame = new Syn_Frame(next_af);
-            if (next_frame->get_status() == Swin)
-            {
-                Syn_Frame::insert_swin_state(next_frame->GetBddPointer(),false);
-                dfs_sta[dfs_cur]->processSignal(To_swin, next_frame->GetBddPointer());
-                while (!model.empty())
-                    model.pop();
-                continue;
-            }
 
             Syn_Frame::addToGraph(dfs_sta[dfs_cur]->GetBddPointer(), next_frame->GetBddPointer());
 
