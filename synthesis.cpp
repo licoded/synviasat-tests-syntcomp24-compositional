@@ -20,6 +20,7 @@ using namespace aalta;
 
 bool SAT_TRACE_FLAG = false;
 bool WholeDFA_FLAG = false;
+bool Minimize_FLAG = true;
 
 unsigned int Syn_Frame::num_varX;
 unsigned int Syn_Frame::num_varY;
@@ -128,7 +129,6 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 #endif
     // get whole DFA
     DFA *dfa = dfaTrue(), *dfa_cur_min;
-    bool MinizeFlag = true;
     for (auto it : and_sub_afs)
     {
         Syn_Graph graph;
@@ -142,7 +142,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 #endif
 
         DFA *dfa_cur = graph2DFA(graph, init_bddP, var_num, indicies);
-        if (MinizeFlag)
+        if (Minimize_FLAG)
         {
             dfa_cur_min = dfaMinimize(dfa_cur);
             free(dfa_cur);
@@ -162,7 +162,7 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
 
         dfa = dfaProduct(dfa, dfa_cur_min, dfaAND);
         free(dfa_cur_min);
-        if (MinizeFlag)
+        if (Minimize_FLAG)
             dfa = dfaMinimize(dfa);
     }
 

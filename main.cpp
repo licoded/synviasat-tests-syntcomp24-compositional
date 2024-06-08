@@ -74,6 +74,11 @@ int main(int argc, char **argv)
 	if (sattrace_flag_Str != NULL && strlen(sattrace_flag_Str) > 0)
 		SAT_TRACE_FLAG = stoi(sattrace_flag_Str);
 
+	const char *minize_flag_Str = getenv("MINIMIZE");
+	Minimize_FLAG = true;
+	if (minize_flag_Str != NULL && strlen(minize_flag_Str) > 0)
+		Minimize_FLAG = stoi(minize_flag_Str);
+
 	bool result = is_realizable(af, env_var, verbose);
 	if (result)
 		cout << "Realizable" << endl;

@@ -18,6 +18,7 @@ using namespace aalta;
 
 extern bool SAT_TRACE_FLAG;
 extern bool WholeDFA_FLAG;
+extern bool Minimize_FLAG;
 
 typedef unsigned long long ull;
 using Syn_Edge = pair<DdNode *, aalta_formula *>;
