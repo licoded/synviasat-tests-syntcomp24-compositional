@@ -400,6 +400,9 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
             {
                 Syn_Frame *predecessor_fr = dfs_sta[dfs_cur];
                 Signal signal = To_swin;
+                /* NOTE: add isAcc_byEmpty_bddP_map to force those states processSignal with Swin to their predecessors */
+                if (Syn_Frame::isAcc_byEmpty_bddP_map[ull(cur_bddP)])
+                    signal = To_swin;
                 if (cur_state_status == Ewin)
                     signal = To_ewin;
                 else if (cur_state_status == Dfs_complete)
