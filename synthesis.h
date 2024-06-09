@@ -110,7 +110,7 @@ void backwardSearch(std::vector<Syn_Frame *> &scc);
 bool forwardSearch_wholeDFA(Syn_Frame *, Syn_Graph &graph);
 void addSccToGraph(std::vector<Syn_Frame *> &scc, Syn_Graph &graph);
 void printGraph(Syn_Graph &graph);
-char *af2binaryString(aalta_formula *af);
+vector<char> *af2binaryString(aalta_formula *af);
 
 void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair);
 

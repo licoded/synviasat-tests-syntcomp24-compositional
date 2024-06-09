@@ -41,14 +41,7 @@ int dfs_time;
 
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
 void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
-char *string2char_ptr(const string &s)
-{
-    char *ptr = new char[s.size() + 1];
-    strcpy(ptr, s.c_str());
-    ptr[s.size()] = '\0';
-    return ptr;
-}
-char *af2binaryString(aalta_formula *af)
+vector<char> *af2binaryString(aalta_formula *af)
 {
     // -11 -1(TAIL)
     unordered_set<int> edgeset;
@@ -61,7 +54,8 @@ char *af2binaryString(aalta_formula *af)
         assert(bin_edge[var_id-12] == 'X');
         bin_edge[var_id-12] = it > 0 ? '1' : '0';
     }
-    return string2char_ptr(bin_edge);
+    vector<char> *bin_edge_ch_vec = new vector<char>(bin_edge.c_str(), bin_edge.c_str() + bin_edge.size() + 1);
+    return bin_edge_ch_vec;
 }
 
 bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, bool verbose = false)
@@ -623,8 +617,8 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
             auto bin_edge_ptr = af2binaryString(edge.label);
-            dfaStoreException(dest_stateid, bin_edge_ptr);
-            delete[] bin_edge_ptr;
+            dfaStoreException(dest_stateid, bin_edge_ptr->data());
+            delete bin_edge_ptr;
         }
         dfaStoreState(false_stateid);
         graph.edges.erase(init_bddP);
@@ -663,8 +657,8 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
         {
             int dest_stateid = bddP_to_stateid[ull(edge.dest)];
             auto bin_edge_ptr = af2binaryString(edge.label);
-            dfaStoreException(dest_stateid, bin_edge_ptr);
-            delete[] bin_edge_ptr;
+            dfaStoreException(dest_stateid, bin_edge_ptr->data());
+            delete bin_edge_ptr;
         }
         dfaStoreState(false_stateid);
     }
@@ -693,10 +687,8 @@ DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies)
      * 2. release state, e.g.
      *      - false R a     i.e.      G(a)
     */
-    // cout << "build_str:\t" << string2char_ptr(state_type_s).get() << endl;
-    auto state_type_char_ptr = string2char_ptr(state_type_s);
-    DFA *dfa = dfaBuild(state_type_char_ptr);
-    delete[] state_type_char_ptr;
+    vector<char> state_type_ch_arr(state_type_s.c_str(), state_type_s.c_str() + state_type_s.size() + 1);
+    DFA *dfa = dfaBuild(state_type_ch_arr.data());
     return dfa;
 }
 
