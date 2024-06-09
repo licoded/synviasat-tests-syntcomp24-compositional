@@ -941,14 +941,12 @@ void getScc(int dfs_cur, std::vector<Syn_Frame *> &scc,
 {
     int lowTimeId = dfn.at((ull)tarjan_sta[dfs_cur]->GetBddPointer());
 
-    while (!tarjan_sta.empty() && low[ull(tarjan_sta.back()->GetBddPointer())] == lowTimeId)
+    while (!tarjan_sta.empty())
     {
         scc.push_back(tarjan_sta.back());
         /* TODO: assert exist before erase? And may bdd_prt repeat in sta, and when 2nd erase it will? */
         sta_bdd2curIdx_map.erase(ull(tarjan_sta.back()->GetBddPointer()));
         tarjan_sta.pop_back();
-        if (dfn.at(ull(scc.back()->GetBddPointer())) == lowTimeId)
-            break;
         if (tarjan_sta.size() == dfs_cur)
             break;
     }
