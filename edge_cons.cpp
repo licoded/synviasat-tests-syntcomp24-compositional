@@ -447,6 +447,14 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
 bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)
 {
     aalta_formula *edge_af = NULL;
+    if (current_X_idx_ != -1)
+    {
+        if (Y_cons_[current_X_idx_]->get_status() == Ewin)
+        {
+            insert_trav_all_afX_X_idx(current_X_idx_);
+            current_X_idx_ = -1;
+        }
+    }
     if (current_X_idx_ == -1)
         for (int i = 0; i < X_parts_.size(); ++i)
         {
