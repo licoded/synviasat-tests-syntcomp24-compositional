@@ -88,6 +88,104 @@ aalta_formula *xnf(aalta_formula *phi)
     }
 }
 
+aalta_formula *xnf_empty(aalta_formula *phi)
+{
+    if (phi == NULL)
+        return NULL;
+    if (f_to_xnf.find(phi) != f_to_xnf.end())
+        return f_to_xnf[phi];
+    int op = phi->oper();
+    if (op >= 11)
+        return phi;
+    switch (op)
+    {
+    case aalta_formula::True:
+    case aalta_formula::False:
+    case aalta_formula::Not:
+    case aalta_formula::Next:
+    case aalta_formula::WNext:
+    {
+        return phi;
+    }
+    case aalta_formula::And:
+    {
+        aalta_formula *lf = xnf_empty(phi->l_af());
+        aalta_formula *rf = xnf_empty(phi->r_af());
+        if ((lf->oper()) == aalta_formula::False || (rf->oper()) == aalta_formula::False)
+            return aalta_formula::FALSE();
+        if ((lf->oper()) == aalta_formula::True)
+            return rf;
+        if ((rf->oper()) == aalta_formula::True)
+            return lf;
+        return aalta_formula(aalta_formula::And, lf, rf).unique();
+    }
+    case aalta_formula::Or:
+    {
+        aalta_formula *lf = xnf_empty(phi->l_af());
+        aalta_formula *rf = xnf_empty(phi->r_af());
+        if ((lf->oper()) == aalta_formula::True || (rf->oper()) == aalta_formula::True)
+            return aalta_formula::TRUE();
+        if ((lf->oper()) == aalta_formula::False)
+            return rf;
+        if ((rf->oper()) == aalta_formula::False)
+            return lf;
+        return aalta_formula(aalta_formula::Or, lf, rf).unique();
+    }
+    case aalta_formula::Until:
+    { // l U r=xnf_empty(r) | (xnf_empty(l) & X(l U r))
+        // keep old, F true = true U true
+        // if (phi->l_af()->oper() == aalta_formula::True && phi->r_af()->oper() == aalta_formula::True)
+        if (phi->l_af() == aalta_formula::TRUE() && phi->r_af() == aalta_formula::TRUE())
+            return phi;
+        aalta_formula *lf = xnf_empty(phi->l_af());
+        aalta_formula *rf = xnf_empty(phi->r_af());
+        aalta_formula *firstpart = NULL;
+        if (rf->oper() == aalta_formula::False)
+            firstpart = aalta_formula::FALSE();
+        else
+        {
+            aalta_formula *F_true_af = aalta_formula(aalta_formula::Until, aalta_formula::TRUE(), aalta_formula::TRUE()).unique();
+            firstpart = aalta_formula(aalta_formula::And, rf, F_true_af).unique();
+        }
+        aalta_formula *secondpart = NULL;
+        if (lf->oper() == aalta_formula::False)
+            secondpart = aalta_formula::FALSE();
+        else
+        {
+            aalta_formula *next_phi = aalta_formula(aalta_formula::Next, NULL, phi).unique();
+            secondpart = aalta_formula(aalta_formula::And, lf, next_phi).unique();
+        }
+        return aalta_formula(aalta_formula::Or, firstpart, secondpart).unique();
+    }
+    case aalta_formula::Release:
+    { // l R r=xnf_empty(r) & (xnf_empty(l) | WX(l R r))
+        // keep old, G false = false R false
+        // if (phi->l_af()->oper() == aalta_formula::False && phi->r_af()->oper() == aalta_formula::False)
+        if (phi->l_af() == aalta_formula::FALSE() && phi->r_af() == aalta_formula::FALSE())
+            return phi;
+        aalta_formula *lf = xnf_empty(phi->l_af());
+        aalta_formula *rf = xnf_empty(phi->r_af());
+        aalta_formula *firstpart = NULL;
+        if (rf->oper() == aalta_formula::True)
+            firstpart = aalta_formula::TRUE();
+        else
+        {
+            aalta_formula *G_false_af = aalta_formula(aalta_formula::Release, aalta_formula::FALSE(), aalta_formula::FALSE()).unique();
+            firstpart = aalta_formula(aalta_formula::Or, rf, G_false_af).unique();
+        }
+        aalta_formula *secondpart = NULL;
+        if (lf->oper() == aalta_formula::True)
+            firstpart = aalta_formula::TRUE();
+        else
+        {
+            aalta_formula *wnext_phi = aalta_formula(aalta_formula::WNext, NULL, phi).unique();
+            secondpart = aalta_formula(aalta_formula::Or, lf, wnext_phi).unique();
+        }
+        return aalta_formula(aalta_formula::And, firstpart, secondpart).unique();
+    }
+    }
+}
+
 aalta_formula *FormulaProgression(aalta_formula *predecessor, unordered_set<int> &edge)
 {
     if (predecessor == NULL)

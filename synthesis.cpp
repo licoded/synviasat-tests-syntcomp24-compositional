@@ -960,7 +960,9 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     aalta_formula *neg_acc_X = preprocessAcc(af);
     if (neg_acc_X == NULL)
         status_ = Swin;
-    state_in_bdd_ = new FormulaInBdd(af);
+    state_in_bdd_ = WholeDFA_FLAG
+        ? new FormulaInBdd(af, xnf_empty(af))
+        : new FormulaInBdd(af);
     if (WholeDFA_FLAG)
     {
         if (isAcc_byEmpty_bddP_map.find(ull(state_in_bdd_->GetBddPointer())) == isAcc_byEmpty_bddP_map.end())
@@ -974,6 +976,7 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
     }
     else if (status_ != Swin)
     {
+        state_in_bdd_ = new FormulaInBdd(af);
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, neg_acc_X);
         status_ = edgeCons_->get_status();
     }

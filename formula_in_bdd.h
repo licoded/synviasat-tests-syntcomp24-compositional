@@ -52,7 +52,8 @@ public:
 
     static DdNode *ConstructBdd(aalta_formula *af);
 
-    FormulaInBdd(aalta_formula *af);
+    FormulaInBdd(aalta_formula *af, aalta_formula *xnf_af);
+    FormulaInBdd(aalta_formula *af) : FormulaInBdd(af, xnf(af)) {}
 
     inline DdNode *GetBddPointer() { return bdd_; }
     inline aalta_formula *GetFormulaPointer() { return formula_; }

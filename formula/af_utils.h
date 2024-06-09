@@ -8,6 +8,7 @@ using namespace aalta;
 using namespace std;
 
 aalta_formula * xnf(aalta_formula *af);
+aalta_formula * xnf_empty(aalta_formula *af);
 // xnf(aalta_formula *phi);
 aalta_formula *FormulaProgression(aalta_formula *predecessor, unordered_set<int> &edge);
 aalta_formula *FormulaProgression_empty(aalta_formula *predecessor, unordered_set<int> &edge);

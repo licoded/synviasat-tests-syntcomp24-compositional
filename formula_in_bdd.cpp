@@ -34,6 +34,12 @@ void FormulaInBdd::InitBdd4LTLf(aalta_formula *src_formula, std::set<int> &X_var
     Cudd_Ref(FALSE_bddP_);
     // PrintMapInfo();
     fixXYOrder(X_vars, Y_vars);
+    aalta_formula *F_true_af = aalta_formula(aalta_formula::Until, aalta_formula::TRUE(), aalta_formula::TRUE()).unique();
+    aaltaP_to_bddP_[ull(F_true_af)] = ull(Cudd_bddNewVar(global_bdd_manager_));
+    Cudd_Ref((DdNode *)(aaltaP_to_bddP_[ull(F_true_af)]));
+    aalta_formula *G_false_af = aalta_formula(aalta_formula::Release, aalta_formula::FALSE(), aalta_formula::FALSE()).unique();
+    aaltaP_to_bddP_[ull(G_false_af)] = ull(Cudd_bddNewVar(global_bdd_manager_));
+    Cudd_Ref((DdNode *)(aaltaP_to_bddP_[ull(G_false_af)]));
     CreatedMap4AaltaP2BddP(src_formula_);
 }
 
@@ -132,9 +138,8 @@ void FormulaInBdd::fixXYOrder(std::set<int> &X_vars, std::set<int> &Y_vars)
     }
 }
 
-FormulaInBdd::FormulaInBdd(aalta_formula *af) : formula_(af)
+FormulaInBdd::FormulaInBdd(aalta_formula *af, aalta_formula *xnf_af) : formula_(af)
 {
-    aalta_formula *xnf_af = xnf(af);
     if (aaltaP_to_bddP_.find(ull(xnf_af)) == aaltaP_to_bddP_.end())
     {
         vector<aalta_formula *> conjuncts;

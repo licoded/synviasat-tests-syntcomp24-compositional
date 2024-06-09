@@ -111,9 +111,11 @@ YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
             edge_af->to_set(edge_var_set);
             fill_in_edgeset(edge_var_set);
             aalta_formula *succ_state_af;
+            DdNode *succ_state_bdd = NULL;
             if (WholeDFA_FLAG)
             {
                 succ_state_af = FormulaProgression_empty(state_af, edge_var_set);
+                succ_state_bdd = FormulaInBdd(succ_state_af, xnf_empty(succ_state_af)).GetBddPointer();
             }
             else
             {
@@ -121,8 +123,8 @@ YCons::YCons(DdNode *root, DdNode *state_bddp, aalta_formula *state_af, aalta_fo
                     succ_state_af = aalta_formula::TRUE();
                 else
                     succ_state_af = FormulaProgression(state_af, edge_var_set); //->simplify();
+                succ_state_bdd = FormulaInBdd(succ_state_af).GetBddPointer();
             }
-            DdNode *succ_state_bdd = FormulaInBdd(succ_state_af).GetBddPointer();
             successors_.push_back(succ_state_bdd);
 
             if (succ_state_bdd == FormulaInBdd::TRUE_bddP_)
