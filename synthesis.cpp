@@ -374,7 +374,7 @@ bool forwardSearch_wholeDFA(Syn_Frame *init_frame, Syn_Graph &graph)
     while (dfs_cur >= 0)
     {
         Status cur_state_status = dfs_sta[dfs_cur]->checkStatus();
-        bool cur_state_should_stopSearch_flag = dfs_sta[dfs_cur]->hasTravAllEdges() || (dfs_sta[dfs_cur]->get_status() == Ewin);
+        bool cur_state_should_stopSearch_flag = dfs_sta[dfs_cur]->should_stopSearch();
         DdNode *cur_bddP = dfs_sta[dfs_cur]->GetBddPointer();
         if (cur_state_should_stopSearch_flag)
         {
@@ -1070,6 +1070,11 @@ void Syn_Frame::processSignal(Signal sig, DdNode *succ)
 bool Syn_Frame::hasTravAllEdges()
 {
     return edgeCons_->hasTravAllEdges();
+}
+
+bool Syn_Frame::should_stopSearch()
+{
+    return hasTravAllEdges() || (edgeCons_->get_status() == Ewin);
 }
 
 bool Syn_Frame::getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)

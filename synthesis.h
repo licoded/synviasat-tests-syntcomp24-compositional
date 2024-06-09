@@ -76,7 +76,7 @@ public:
 
     bool getEdge(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model);
     Status get_status() { return status_; }
-    bool should_stopSearch() { return hasTravAllEdges() || (edgeCons_->get_status() == Ewin); }
+    bool should_stopSearch();
 
     void get_succ_edges(vector<Syn_Edge> &succ_edges);
 
