@@ -283,16 +283,19 @@ void edgeCons::processSignal_wholeDFA(Signal sig, DdNode *succ)
         for (auto it = range.first; it != range.second; ++it)
         {
             Y_cons_[it->second]->processSignal_wholeDFA(Pending, succ);
+            if (Y_cons_[it->second]->hasTravAllEdges())
+                insert_trav_all_afX_X_idx(it->second);
             if (Y_cons_[it->second]->get_status() == Dfs_complete)
             {
                 insert_dfs_complete_X_idx(it->second);
-                insert_trav_all_afX_X_idx(it->second);
             }
         }
         if (status_ == Dfs_incomplete && (swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
             X_parts_.size())
             status_ = Dfs_complete;
     }
+    if ((current_X_idx_ != -1) && Y_cons_[current_X_idx_]->hasTravAllEdges())
+        current_X_idx_ = -1;
 }
 
 void YCons::processSignal_wholeDFA(Signal sig, DdNode *succ)
@@ -447,14 +450,6 @@ bool edgeCons::getEdge(unordered_set<int> &edge,
 bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formula *, aalta_formula *>> &model)
 {
     aalta_formula *edge_af = NULL;
-    if (current_X_idx_ != -1)
-    {
-        if (Y_cons_[current_X_idx_]->get_status() == Ewin)
-        {
-            insert_trav_all_afX_X_idx(current_X_idx_);
-            current_X_idx_ = -1;
-        }
-    }
     if (current_X_idx_ == -1)
         for (int i = 0; i < X_parts_.size(); ++i)
         {
@@ -475,6 +470,15 @@ bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formu
     // cout<<edge_af->to_string()<<endl;
     fill_in_edgeset(edge);
     return true; 
+}
+
+void edgeCons::check_hasTravAllEdges()
+{
+    for (int i = 0; i < X_parts_.size(); ++i)
+    {
+        if (Y_cons_[i]->hasTravAllEdges())
+            insert_trav_all_afX_X_idx(i);
+    }
 }
 
 aalta_formula *YCons::getEdge()

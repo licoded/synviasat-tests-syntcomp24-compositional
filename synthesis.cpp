@@ -519,10 +519,11 @@ void backwardSearch(vector<Syn_Frame *> &scc)
                       pred->begin(), pred->end(),
                       inserter(candidate_new_swin, candidate_new_swin.begin()));
         }
+        set<DdNode *> candidate_new_swin_filtered;
         set_intersection(candidate_new_swin.begin(), candidate_new_swin.end(),
                          undecided.begin(), undecided.end(),
-                         inserter(candidate_new_swin, candidate_new_swin.begin()));
-        for (auto s : candidate_new_swin)
+                         inserter(candidate_new_swin_filtered, candidate_new_swin_filtered.begin()));
+        for (auto s : candidate_new_swin_filtered)
         {
             if (bddP_to_synFrP[ull(s)]->checkSwinForBackwardSearch())
             {
@@ -970,6 +971,7 @@ Syn_Frame::Syn_Frame(aalta_formula *af)
             isAcc_byEmpty_bddP_map.insert({ull(state_in_bdd_->GetBddPointer()), IsEmptyAcc(af->nnf())});
         }
         edgeCons_ = new edgeCons(state_in_bdd_->GetBddPointer(), af, aalta_formula::TRUE());
+        edgeCons_->check_hasTravAllEdges();
         status_ = edgeCons_->get_status();
         if (isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
             status_ = Swin;

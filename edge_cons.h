@@ -82,6 +82,7 @@ public:
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool checkSwinForBackwardSearch();
     bool hasTravAllEdges() { return trav_all_afX_X_idx_.size() == X_parts_.size(); }
+    void check_hasTravAllEdges();
     void get_succ_edges(vector<Syn_Edge> &succ_Y_edges);
 
 private:
