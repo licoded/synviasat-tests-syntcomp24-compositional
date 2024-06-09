@@ -13,7 +13,6 @@ extern "C" {
 
 #include "formula_in_bdd.h"
 #include "preprocess.h"
-#include "my_mona_dfa.h"
 
 using namespace std;
 using namespace aalta;
@@ -40,8 +39,6 @@ unordered_map<ull, int> dfn;
 unordered_map<ull, int> low;
 int dfs_time;
 
-void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa);
-bool dfa_backward_check(string &dfa_filename);
 DFA *graph2DFA(Syn_Graph &graph, DdNode *init_bddP, int var_num, int *indicies);
 void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_index);
 char *string2char_ptr(const string &s)
@@ -197,7 +194,6 @@ bool is_realizable(aalta_formula *src_formula, unordered_set<string> &env_var, b
         delete[] var_names[i];
     delete[] var_names;
 
-    // return dfa_backward_check(wholedfa_filename);
     return syn_res;
 }
 
@@ -715,45 +711,6 @@ void printDFA(DFA *dfa, string &dot_filename, int var_num, unsigned int *var_ind
     stdout = original_stdout;
 }
 
-void monaDFA2graph(MonaDFA_Graph &graph, MyMonaDFA &dfa)
-{
-    for (int i = 0; i < dfa.states_num; i++)
-    {
-        vector<MonaDFA_Edge> cur_succ_edges;
-        /* non-recursive DFS getEdge */
-        stack<pair<int, aalta_formula *>> state_search_sta;
-        state_search_sta.push({dfa.behaviour[i], aalta_formula::TRUE()});   // cur_bdd_id, pre_formula
-        while(!state_search_sta.empty())
-        {
-            auto top_item = state_search_sta.top();
-            state_search_sta.pop();
-            vector<int> &cur_bdd = dfa.bdd[top_item.first];
-            if (isEnd(cur_bdd))
-            {
-                int succ_state_id = cur_bdd[1];
-                // graph.add_edge(i, cur_bdd[1], top_item.second);
-                cur_succ_edges.push_back({succ_state_id, top_item.second});
-            }
-            else
-            {
-                int x = cur_bdd[0], l = cur_bdd[1], r = cur_bdd[2];
-                aalta_formula *cur_var = aalta_formula(x+12, NULL, NULL).unique();   // TODO: ensure 12!!!
-                aalta_formula *not_cur = aalta_formula(aalta_formula::Not, NULL, cur_var).unique();
-                state_search_sta.push({l, aalta_formula(aalta_formula::And, top_item.second, not_cur).unique()});
-                state_search_sta.push({r, aalta_formula(aalta_formula::And, top_item.second, cur_var).unique()});
-            }
-        }
-        /* add to Graph */
-        graph.add_vertex(i);
-        for (auto edge : cur_succ_edges)
-        {
-            if (i == edge.first)
-                continue;
-            graph.add_edge(i, edge.first, edge.second);
-        }
-    }
-}
-
 void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair)
 {
     unordered_set<int> edge_set;
@@ -783,137 +740,6 @@ void split_afXY(aalta_formula *edge, vector<aalta_formula *> &af_XY_pair)
     af_XY_pair.clear();
     af_XY_pair.push_back(afX);
     af_XY_pair.push_back(afY);
-}
-
-bool dfa_backward_check(string &dfa_filename)
-{
-    MyMonaDFA my_dfa;
-    my_dfa.readMyMonaDFA(dfa_filename);
-    MonaDFA_Graph mona_graph;
-    monaDFA2graph(mona_graph, my_dfa);
-
-    using MyYCons = pair<ull, int>;
-    using MyXCons = unordered_map<ull, vector<MyYCons>*>;
-    using MyEdgeCons = unordered_map<int, MyXCons *>;
-    MyEdgeCons edge_cons_map;
-    unordered_map<int, set<int>*> predecessors_map;
-
-    for (auto vertex : mona_graph.vertices)
-    {
-        if (mona_graph.edges.find(vertex) == mona_graph.edges.end())
-        {
-            edge_cons_map.insert({vertex, NULL});
-            continue;
-        }
-        auto vertex_edges = mona_graph.edges[vertex];
-        MyXCons *vertex_XCons = new MyXCons();
-        for (auto edge : vertex_edges)
-        {
-            auto edge_af = edge.label;
-            auto successor = edge.dest;
-            if (predecessors_map.find(successor) == predecessors_map.end())
-            {
-                predecessors_map.insert({successor, new set<int>()});
-            }
-            predecessors_map[successor]->insert(vertex);
-            /* TODO: split afX and afY from edge_af */
-            vector<aalta_formula *> af_XY_pair;
-            split_afXY(edge_af, af_XY_pair);
-            assert(af_XY_pair.size() == 2);
-            aalta_formula *afX = af_XY_pair[0];
-            aalta_formula *afY = af_XY_pair[1];
-            /* TODO: collect ptrs and clean them in the end of func */
-            FormulaInBdd *afX_in_bdd = new FormulaInBdd(afX);
-            FormulaInBdd *afY_in_bdd = new FormulaInBdd(afY);
-            ull afX_bddP = ull(afX_in_bdd->GetBddPointer());
-            ull afY_bddP = ull(afY_in_bdd->GetBddPointer());
-            delete afX_in_bdd;
-            delete afY_in_bdd;
-            if (vertex_XCons->find(afX_bddP) == vertex_XCons->end())
-            {
-                vertex_XCons->insert({afX_bddP, new vector<MyYCons>()});
-            }
-            vertex_XCons->at(afX_bddP)->push_back({afY_bddP, successor});
-        }
-        edge_cons_map.insert({vertex, vertex_XCons});
-    }
-
-    set<int> cur_swin, new_swin, swin;
-    for (int i = 0; i < my_dfa.states_num; i++)
-    {
-        if (my_dfa.final[i] == 1)
-        {
-            cur_swin.insert(i);
-            swin.insert(i);
-        }
-    }
-    bool is_realizable = false;
-    do {
-        if (swin.find(my_dfa.initial_stateid) != swin.end())
-        {
-            is_realizable = true;
-            break;
-        }
-
-        new_swin.clear();
-        set<int> candidate_new_swin_pre;
-        for (auto it : cur_swin)
-        {
-            set<int> *pred = predecessors_map[it];
-            set_union(candidate_new_swin_pre.begin(), candidate_new_swin_pre.end(),
-                      pred->begin(), pred->end(),
-                      inserter(candidate_new_swin_pre, candidate_new_swin_pre.begin()));
-        }
-        set<int> candidate_new_swin;
-        set_difference(candidate_new_swin_pre.begin(), candidate_new_swin_pre.end(),
-                       swin.begin(), swin.end(),
-                       inserter(candidate_new_swin, candidate_new_swin.begin()));
-        for (auto s : candidate_new_swin)
-        {
-            if (edge_cons_map[s] == NULL)
-                continue;
-            bool cur_s_isSwin = true;
-            for (auto afX_myYCons_vec_pair : *edge_cons_map[s])
-            {
-                bool cur_afX_toSwin = false;
-                for (auto myYCons : *(afX_myYCons_vec_pair.second))
-                {
-                    if (swin.find(myYCons.second) != swin.end())
-                    {
-                        cur_afX_toSwin = true;
-                        break;
-                    }
-                }
-                if (!cur_afX_toSwin)
-                {
-                    cur_s_isSwin = false;
-                    break;
-                }
-            }
-            if (cur_s_isSwin)
-            {
-                new_swin.insert(s);
-                swin.insert(s);
-            }
-        }
-        cur_swin = new_swin;
-    } while (!new_swin.empty());
-
-    for (auto edge_cons_item : edge_cons_map)
-    {
-        if (edge_cons_item.second == NULL)
-            continue;
-        for (auto my_xcons_item : *(edge_cons_item.second))
-        {
-            delete my_xcons_item.second;
-        }
-        delete edge_cons_item.second;
-    }
-    // unordered_map<int, set<int>*> predecessors_map;
-    for (auto prodecessors_item : predecessors_map)
-        delete prodecessors_item.second;
-
-    return is_realizable;
 }
 
 void initial_tarjan_frame(Syn_Frame *cur_frame)
