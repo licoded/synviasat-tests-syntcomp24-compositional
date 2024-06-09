@@ -1054,10 +1054,17 @@ void PartitionAtoms(aalta_formula *af, unordered_set<string> &env_val)
 
 void Syn_Frame::processSignal(Signal sig, DdNode *succ)
 {
-    /* NOTE: add isAcc_byEmpty_bddP_map to force those states processSignal with Swin to their predecessors */
-    if (Syn_Frame::isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
-        sig = To_swin;
-    edgeCons_->processSignal(sig, succ);
+    if (WholeDFA_FLAG)
+    {
+        /* NOTE: add isAcc_byEmpty_bddP_map to force those states processSignal with Swin to their predecessors */
+        if (Syn_Frame::isAcc_byEmpty_bddP_map[ull(state_in_bdd_->GetBddPointer())])
+            sig = To_swin;
+        edgeCons_->processSignal_wholeDFA(sig, succ);
+    }
+    else
+    {
+        edgeCons_->processSignal(sig, succ);
+    }
 }
 
 bool Syn_Frame::hasTravAllEdges()

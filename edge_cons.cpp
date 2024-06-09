@@ -169,33 +169,13 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
-        {
             insert_swin_X_idx(it->second);
-            Y_cons_[it->second]->processSignal(To_swin, succ);
-            // NOTE: the following codes are useless, as we only need do in edgeCons::getEdge_wholeDFA
-            // if (Y_cons_[it->second]->hasTravAllEdges())
-            // {
-            //     insert_trav_all_afX_X_idx(it->second);
-            // }
-        }
         if (swin_X_idx_.size() == X_parts_.size())
             status_ = Swin;
         else if ((swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
                  X_parts_.size())
             status_ = Dfs_complete;
-        if (!WholeDFA_FLAG)
-            current_X_idx_ = -1;
-        else
-        {
-            if (current_X_idx_ != -1)
-            {
-                if (Y_cons_[current_X_idx_]->hasTravAllEdges())
-                {
-                    insert_trav_all_afX_X_idx(current_X_idx_);
-                    current_X_idx_ = -1;
-                }
-            }
-        }
+        current_X_idx_ = -1;
     }
     else if (sig == To_ewin)
     {
@@ -257,17 +237,79 @@ void edgeCons::processSignal(Signal sig, DdNode *succ)
     }
 }
 
-void YCons::processSignal(Signal sig, DdNode *succ)
+void edgeCons::processSignal_wholeDFA(Signal sig, DdNode *succ)
 {
-    // assert(sig != To_swin);
+    if (sig == To_swin)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+        {
+            insert_swin_X_idx(it->second);
+            Y_cons_[it->second]->processSignal_wholeDFA(To_swin, succ);
+            if (Y_cons_[it->second]->hasTravAllEdges())
+            {
+                insert_trav_all_afX_X_idx(it->second);
+            }
+        }
+        if (swin_X_idx_.size() == X_parts_.size())
+            status_ = Swin;
+        else if ((swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
+                 X_parts_.size())
+            status_ = Dfs_complete;
+    }
+    else if (sig == To_ewin)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+        {
+            Y_cons_[it->second]->processSignal_wholeDFA(To_ewin, succ);
+            if (Y_cons_[it->second]->get_status() == Ewin)
+            {
+                status_ = Ewin;
+                current_X_idx_ = -1;
+                return;
+            }
+            else if (Y_cons_[it->second]->get_status() == Dfs_complete)
+            {
+                insert_dfs_complete_X_idx(it->second);
+            }
+        }
+        if (status_ == Dfs_incomplete && (swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
+            X_parts_.size())
+            status_ = Dfs_complete;
+        if (Y_cons_[current_X_idx_]->hasTravAllEdges())
+            current_X_idx_ = -1;
+    }
+    else if (sig == Pending)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+        {
+            Y_cons_[it->second]->processSignal_wholeDFA(Pending, succ);
+            if (Y_cons_[it->second]->get_status() == Dfs_complete)
+                insert_dfs_complete_X_idx(it->second);
+        }
+        if (status_ == Dfs_incomplete && (swin_X_idx_.size() + dfs_complete_X_idx_.size()) ==
+            X_parts_.size())
+            status_ = Dfs_complete;
+        if (Y_cons_[current_X_idx_]->hasTravAllEdges())
+            current_X_idx_ = -1;
+    }
+    else
+    {
+        current_X_idx_ = -1;
+    }
+}
+
+void YCons::processSignal_wholeDFA(Signal sig, DdNode *succ)
+{
     if (sig == To_ewin)
     {
         auto range = succ_bddP_to_idx_.equal_range(ull(succ));
         for (auto it = range.first; it != range.second; ++it)
         {
             insert_ewin_Y_idx(it->second);
-            if(WholeDFA_FLAG)
-                insert_trav_all_afY_Y_idx(it->second);
+            insert_trav_all_afY_Y_idx(it->second);
         }
         if (ewin_Y_idx_.size() == Y_parts_.size())
             status_ = Ewin;
@@ -277,14 +319,11 @@ void YCons::processSignal(Signal sig, DdNode *succ)
     else if (sig == To_swin)
     {
         status_ = Swin;
-        if (WholeDFA_FLAG)
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
         {
-            auto range = succ_bddP_to_idx_.equal_range(ull(succ));
-            for (auto it = range.first; it != range.second; ++it)
-            {
-                insert_swin_Y_idx(it->second);
-                insert_trav_all_afY_Y_idx(it->second);
-            }
+            insert_swin_Y_idx(it->second);
+            insert_trav_all_afY_Y_idx(it->second);
         }
     }
     else if (sig == Pending)
@@ -293,9 +332,39 @@ void YCons::processSignal(Signal sig, DdNode *succ)
         for (auto it = range.first; it != range.second; ++it)
         {
             insert_searched_Y_idx(it->second);
-            if(WholeDFA_FLAG)
-                insert_trav_all_afY_Y_idx(it->second);
+            insert_trav_all_afY_Y_idx(it->second);
         }
+        if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
+            status_ = Dfs_complete;
+    }
+    else
+    {
+        if (searched_Y_idx_.empty())
+            status_ = Ewin;
+        else
+            status_ = Dfs_complete;
+    }
+    current_Y_idx_ = -1;
+}
+
+void YCons::processSignal(Signal sig, DdNode *succ)
+{
+    assert(sig != To_swin);
+    if (sig == To_ewin)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+            insert_ewin_Y_idx(it->second);
+        if (ewin_Y_idx_.size() == Y_parts_.size())
+            status_ = Ewin;
+        else if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
+            status_ = Dfs_complete;
+    }
+    else if (sig == Pending)
+    {
+        auto range = succ_bddP_to_idx_.equal_range(ull(succ));
+        for (auto it = range.first; it != range.second; ++it)
+            insert_searched_Y_idx(it->second);
         if (ewin_Y_idx_.size() + searched_Y_idx_.size() == Y_parts_.size())
             status_ = Dfs_complete;
     }
@@ -403,7 +472,7 @@ bool edgeCons::getEdge_wholeDFA(unordered_set<int> &edge, queue<pair<aalta_formu
         }
     if (current_X_idx_ == -1)
     {
-        processSignal(Unsat, NULL);
+        processSignal_wholeDFA(Unsat, NULL);
         return false;
     }
     aalta_formula *af_X = X_parts_[current_X_idx_];
@@ -445,7 +514,7 @@ aalta_formula *YCons::getEdge_wholeDFA()
         }
     if (current_Y_idx_ == -1)
     {
-        processSignal(Unsat, NULL);
+        processSignal_wholeDFA(Unsat, NULL);
         return NULL;
     }
     return Y_parts_[current_Y_idx_];

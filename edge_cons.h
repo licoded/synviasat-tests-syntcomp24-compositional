@@ -28,6 +28,7 @@ public:
     void get_related_succ(vector<DdNode *> &);
     Status get_status() { return status_; }
     void processSignal(Signal, DdNode *succ);
+    void processSignal_wholeDFA(Signal, DdNode *succ);
     aalta_formula *getEdge();
     aalta_formula *getEdge_wholeDFA();
     aalta_formula * set_search_direction(aalta_formula *Y);
@@ -74,6 +75,7 @@ public:
     ~edgeCons();
     Status get_status() { return status_; }
     void processSignal(Signal, DdNode *succ);
+    void processSignal_wholeDFA(Signal, DdNode *succ);
     bool getEdge(unordered_set<int> &edge,
                  queue<pair<aalta_formula *, aalta_formula *>> &model);
     bool getEdge_wholeDFA(unordered_set<int> &edge,
